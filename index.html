@@ -13,7 +13,7 @@
   font-family: 'kuffi';
   font-style: normal;
   font-weight: 400;
-  src: url(./assets/fonts/kuffi.ttf) format('truetype')  ;
+  src: url(/assets/fonts/kuffi.ttf) format('truetype')  ;
   unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+1EE00-1EEFF;
 }
 
@@ -53,7 +53,8 @@ body{
   transition:background .35s var(--ease), color .35s var(--ease);
   min-height:100vh; overflow-x:hidden;
 }
-.font-amiri{
+.font-amiri{font-family:'Amiri',serif;}
+.name-font{
     font-family:'kuffi','Amiri',serif !important;
     font-weight:400 !important;
     font-size: 42px !important;
@@ -733,7 +734,7 @@ function renderHome(){
       </svg>
       <div class="hero-text">
         <div class="muted" style="font-size:14px; margin-bottom:4px;">السلام عليكم</div>
-        <div class="font-amiri" style="font-size:28px; font-weight:700; margin-bottom:10px;">${esc(name)}</div>
+        <div class="name-font" style="font-size:28px; font-weight:700; margin-bottom:10px;">${esc(name)}</div>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
           <span class="pill">📅 ${gregorianStr()}</span>
           <span class="pill">🌙 ${hijriDate()}</span>
