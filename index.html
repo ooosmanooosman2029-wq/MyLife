@@ -342,7 +342,10 @@ const Store = {
       try{
         const r = await window.storage.get(key, false);
         if(r) return JSON.parse(r.value);
-      }catch(e){}
+        // cloud returned no value (key not set yet there) - fall through to check local backup below
+      }catch(e){
+        // not found / transient error from cloud storage - fall through to local backup
+      }
     }
     try{
       const raw = localStorage.getItem(LOCAL_PREFIX+key);
@@ -350,7 +353,8 @@ const Store = {
     }catch(e){ return fallback; }
   },
   async set(key, value){
-    try{ localStorage.setItem(LOCAL_PREFIX+key, JSON.stringify(value)); }catch(e){}
+    // always keep a local backup so refresh never loses data, even if cloud storage is unavailable
+    try{ localStorage.setItem(LOCAL_PREFIX+key, JSON.stringify(value)); }catch(e){ /* localStorage unavailable, ignore */ }
     if(hasCloudStorage()){
       try{ await window.storage.set(key, JSON.stringify(value), false); }
       catch(e){ console.error('cloud storage set failed, using local backup', key, e); }
@@ -360,7 +364,7 @@ const Store = {
 
 /* ---------- in-memory cache (loaded at boot) ---------- */
 const DB = {
-  settings: { theme:'light', username:'عثمان' },
+  settings: { theme:'light', username:'hhh' },
   prayerHistory: {},
   quranProgress: {},
   books: [],
@@ -414,7 +418,6 @@ const MOTIVATION = ['أحسنت، استمر.','ما شاء الله عليك.',
 let toastTimer=null;
 function showToast(msg, icon='✨'){
   const t = $('#toast');
-  if(!t) return;
   t.innerHTML = `<span>${icon}</span><span>${esc(msg)}</span>`;
   t.classList.add('show');
   clearTimeout(toastTimer);
@@ -582,49 +585,30 @@ function openSettingsModal(){
       <div class="muted" style="font-size:12px; margin-bottom:10px;">احفظ نسخة من كل بياناتك على جهازك، أو استرجعها لو اتمسحت</div>
       <div style="display:flex; gap:8px;">
         <button class="btn" style="flex:1" onclick="exportBackup()">⬇️ تنزيل نسخة احتياطية</button>
-        <button class="btn" style="flex:1" onclick="document.getElementById('importBackupInput').click()">⬆️ استرجع نسخة</button>
+        <button class="btn" style="flex:1" onclick="document.getElementById('importBackupInput').click()">⬆️ استرجاع نسخة</button>
       </div>
       <input type="file" id="importBackupInput" accept="application/json" style="display:none" onchange="importBackup(this.files[0])">
     </div>
   `);
 }
-function setThemeChoice(t){
-  DB.settings.theme=t;
-  applyTheme();
-  persist.settings();
-  renderTopbarTheme();
-  openSettingsModal();
-}
+function setThemeChoice(t){ DB.settings.theme=t; applyTheme(); persist.settings(); renderTopbarTheme(); openSettingsModal(); }
 function saveSettings(){
   DB.settings.username = $('#setUsername').value.trim();
-  persist.settings();
-  closeModal();
-  renderApp();
+  persist.settings(); closeModal(); renderApp();
 }
+
 function exportBackup(){
   const backup = {
     exportedAt: new Date().toISOString(),
-    settings: DB.settings,
-    prayerHistory: DB.prayerHistory,
-    quranProgress: DB.quranProgress,
-    books: DB.books,
-    journal: DB.journal,
-    courses: DB.courses,
-    lessons: DB.lessons,
-    goals2026: DB.goals2026,
-    focusTasks: DB.focusTasks,
-    achievementsSeen: DB.achievementsSeen,
-    wallet: DB.wallet,
-    transactions: DB.transactions
+    settings: DB.settings, prayerHistory: DB.prayerHistory, quranProgress: DB.quranProgress,
+    books: DB.books, journal: DB.journal, courses: DB.courses, lessons: DB.lessons,
+    goals2026: DB.goals2026, focusTasks: DB.focusTasks, achievementsSeen: DB.achievementsSeen,
   };
   const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = `my-life-backup-${todayKey()}.json`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+  a.href = url; a.download = `my-life-backup-${todayKey()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(url);
   showToast('تم تنزيل نسخة احتياطية','💾');
 }
@@ -643,12 +627,8 @@ async function importBackup(file){
     if(backup.goals2026) DB.goals2026 = backup.goals2026;
     if(backup.focusTasks) DB.focusTasks = backup.focusTasks;
     if(backup.achievementsSeen) DB.achievementsSeen = backup.achievementsSeen;
-    if(backup.wallet) DB.wallet = backup.wallet;
-    if(backup.transactions) DB.transactions = backup.transactions;
     await Promise.all(Object.values(persist).map(fn=>fn()));
-    applyTheme();
-    closeModal();
-    renderApp();
+    applyTheme(); closeModal(); renderApp();
     showToast('تم استرجاع بياناتك بنجاح','✅');
   }catch(e){
     showToast('حصل خطأ، تأكد إن الملف نسخة احتياطية صحيحة','⚠️');
@@ -663,14 +643,15 @@ const HABIT_GROUPS = [
   {title:'الأذكار', keys:[['adhkarS','أذكار الصباح'],['adhkarM','أذكار المساء']]},
   {title:'الذكر', keys:[['quranWird','ورد الذكر']]},
 ];
+
+// "إنجاز اليوم" is based on the 5 obligatory prayers + 2 adhkar (7 items total)
 const HOME_PCT_KEYS = ['fajr','dhuhr','asr','maghrib','isha','adhkarS','adhkarM'];
 function dayCompletionPct(day){
   const done = HOME_PCT_KEYS.filter(k=>day[k]).length;
   return Math.round((done/HOME_PCT_KEYS.length)*100);
 }
-function allObligatoryDone(day){
-  return OBLIGATORY.every(k=>day[k]);
-}
+function allObligatoryDone(day){ return OBLIGATORY.every(k=>day[k]); }
+
 function toggleHabit(key){
   const day = getDay(todayKey());
   day[key] = !day[key];
@@ -684,15 +665,12 @@ function toggleHabit(key){
   }
   renderHome();
 }
+
 function computeStreak(){
-  let streak=0;
-  let d=new Date();
+  let streak=0; let d=new Date();
   while(true){
     const day = DB.prayerHistory[todayKey(d)];
-    if(day && allObligatoryDone(day)){
-      streak++;
-      d.setDate(d.getDate()-1);
-    } else break;
+    if(day && allObligatoryDone(day)){ streak++; d.setDate(d.getDate()-1); } else break;
   }
   return streak;
 }
@@ -701,817 +679,875 @@ function computeLongestStreak(){
   let longest=0, cur=0, prev=null;
   for(const ds of dates){
     const d = new Date(ds);
-    if(prev && (d - prev)/86400000 === 1) cur++;
-    else cur=1;
-    longest = Math.max(longest,cur);
-    prev=d;
+    if(prev && (d - prev)/86400000 === 1) cur++; else cur=1;
+    longest = Math.max(longest,cur); prev=d;
   }
   return longest;
 }
-function totalCompletedDays(){
-  return Object.values(DB.prayerHistory).filter(allObligatoryDone).length;
-}
+function totalCompletedDays(){ return Object.values(DB.prayerHistory).filter(allObligatoryDone).length; }
+
 function last7DaysPct(){
   const out=[];
   for(let i=6;i>=0;i--){
-    const d = new Date();
-    d.setDate(d.getDate()-i);
+    const d = new Date(); d.setDate(d.getDate()-i);
     const day = DB.prayerHistory[todayKey(d)] || emptyDay();
     out.push({label:WEEKDAYS_AR[d.getDay()].slice(0,3), pct:dayCompletionPct(day)});
   }
   return out;
 }
+function monthWeeksPct(){
+  const out=[]; const now = new Date();
+  for(let w=3; w>=0; w--){
+    let sum=0,n=0;
+    for(let i=6;i>=0;i--){
+      const d=new Date(); d.setDate(now.getDate() - (w*7+i));
+      const day = DB.prayerHistory[todayKey(d)];
+      if(day){ sum+=dayCompletionPct(day); n++; }
+    }
+    out.push({label:`أسبوع ${4-w}`, pct: n? Math.round(sum/7) : 0});
+  }
+  return out;
+}
 
 function renderHome(){
-  const h = $('#page-home');
+  const el = $('#page-home'); if(!el) return;
   const day = getDay(todayKey());
   const pct = dayCompletionPct(day);
-  const streak = computeStreak();
+  const name = DB.settings.username || 'عثمان';
+  const streak = computeStreak(), longest = computeLongestStreak(), totalDays = totalCompletedDays();
+  const circumference = 2*Math.PI*52;
+  const offset = circumference - (pct/100)*circumference;
 
-  const circumference = 2 * Math.PI * 73;
-  const offset = circumference - (pct / 100) * circumference;
-
-  h.innerHTML = `
+  el.innerHTML = `
     <div class="hero-greeting">
+      <svg class="mosque-deco" viewBox="0 0 400 100" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+        <rect x="0" y="62" width="400" height="38" fill="var(--accent)"/>
+        ${Array.from({length:11}).map((_,i)=>`<path d="M${i*38},100 L${i*38},78 Q${i*38+19},58 ${i*38+38},78 L${i*38+38},100 Z" fill="var(--bg-elevated)"/>`).join('')}
+        <rect x="28" y="20" width="13" height="62" rx="2" fill="var(--accent)"/>
+        <polygon points="28,20 41,20 34.5,2" fill="var(--accent)"/>
+        <circle cx="34.5" cy="2" r="3" fill="var(--accent)"/>
+        <rect x="359" y="20" width="13" height="62" rx="2" fill="var(--accent)"/>
+        <polygon points="359,20 372,20 365.5,2" fill="var(--accent)"/>
+        <circle cx="365.5" cy="2" r="3" fill="var(--accent)"/>
+        <rect x="160" y="48" width="80" height="34" fill="var(--accent)"/>
+        <path d="M160,48 Q200,-6 240,48 Z" fill="var(--accent)"/>
+        <circle cx="200" cy="-4" r="10" fill="var(--accent)"/>
+        <circle cx="205" cy="-7" r="8.5" fill="var(--primary-dim)"/>
+      </svg>
       <div class="hero-text">
-        <div style="font-size:14px; opacity:.85; margin-bottom:4px;">${gregorianStr()} — ${hijriDate()}</div>
-        <h1 style="margin:0 0 6px 0; font-weight:800; font-size:26px;">السلام عليكم، يا <span class="name-font">${esc(DB.settings.username)}</span> 👋</h1>
-        <div class="muted" style="font-size:15px; max-width:550px;">يوم جديد فرصة جديدة لتبني عادات عظيمة، وتتقرب من أهدافك خطوة بخطوة.</div>
-      </div>
-      <div class="mosque-deco">
-        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style="width:100%; height:100%; fill:var(--primary); opacity:.12;">
-          <path d="M0,120 L1200,120 L1200,100 C1150,90 1100,60 1050,60 C1000,60 950,90 900,100 C850,90 800,60 750,60 C700,60 650,90 600,100 C550,90 500,60 450,60 C400,60 350,90 300,100 C250,90 200,60 150,60 C100,60 50,90 0,100 Z"/>
-        </svg>
+        <div class="muted" style="font-size:14px; margin-bottom:4px;">السلام عليكم</div>
+        <div class="name-font" style="font-size:28px; font-weight:700; margin-bottom:10px;">${esc(name)}</div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <span class="pill">📅 ${gregorianStr()}</span>
+          <span class="pill">🌙 ${hijriDate()}</span>
+        </div>
       </div>
     </div>
 
-    <div class="grid grid-3" style="margin-top:-64px; margin-bottom:24px; position:relative; z-index:5;">
-      <div class="card" style="display:flex; align-items:center; gap:16px;">
+    <div class="grid grid-3" style="margin-bottom:16px;">
+      <div class="card" style="grid-column:span 1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
         <div class="ring-wrap">
-          <svg viewBox="0 0 160 160">
-            <defs>
-              <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="var(--primary)"/>
-                <stop offset="100%" stop-color="var(--primary-light)"/>
-              </linearGradient>
-            </defs>
-            <circle class="ring-bg" cx="80" cy="80" r="73"/>
-            <circle class="ring-fg" cx="80" cy="80" r="73" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"/>
+          <svg viewBox="0 0 120 120">
+            <defs><linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="var(--accent)"/><stop offset="100%" stop-color="var(--primary)"/>
+            </linearGradient></defs>
+            <circle class="ring-bg" cx="60" cy="60" r="52"/>
+            <circle class="ring-fg" cx="60" cy="60" r="52" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"/>
           </svg>
-          <div class="ring-center">
-            <span class="ring-pct">${pct}%</span>
-            <span class="ring-label">إنجاز اليوم</span>
-          </div>
+          <div class="ring-center"><div class="ring-pct">${pct}%</div><div class="ring-label">إنجاز اليوم</div></div>
         </div>
       </div>
-
-      <div class="card" style="display:flex; flex-direction:column; justify-content:center; text-align:center;">
-        <div style="font-size:14px; font-weight:700;" class="muted">الالتزام الحالي</div>
-        <div style="font-size:42px; font-weight:900; margin:6px 0; color:var(--accent);" class="font-amiri">
-          ${streak} <span class="streak-flame">${streak>0?'🔥':'❄️'}</span>
-        </div>
-        <div style="font-size:12.5px; font-weight:600;" class="muted">أيام متتالية من الفرائض كاملة</div>
+      <div class="card" style="display:flex; flex-direction:column; justify-content:center; gap:10px;">
+        <div style="display:flex; align-items:center; gap:10px;"><span class="streak-flame">🔥</span><div><div style="font-weight:800; font-size:18px;">${streak} يوم</div><div class="muted" style="font-size:12.5px;">سلسلة الصلوات الحالية</div></div></div>
+        <div style="display:flex; align-items:center; gap:10px;"><span class="streak-flame">⭐</span><div><div style="font-weight:800; font-size:18px;">${longest} يوم</div><div class="muted" style="font-size:12.5px;">أطول سلسلة</div></div></div>
       </div>
-
-      <div class="card" style="display:flex; flex-direction:column; justify-content:center;">
-        <div style="font-size:13px; font-weight:700; margin-bottom:10px;" class="muted">معدل الالتزام (آخر 7 أيام)</div>
-        <div class="chart-bars">
-          ${last7DaysPct().map(d=>`
-            <div class="chart-col">
-              <div class="chart-fill" style="height:${clamp(d.pct,4,100)}%" title="${d.pct}%"></div>
-              <span class="chart-lbl">${d.label}</span>
-            </div>
-          `).join('')}
-        </div>
+      <div class="card" style="display:flex; flex-direction:column; justify-content:center; gap:10px;">
+        <div style="display:flex; align-items:center; gap:10px;"><span class="streak-flame">✅</span><div><div style="font-weight:800; font-size:18px;">${totalDays} يوم</div><div class="muted" style="font-size:12.5px;">إجمالي أيام الفرائض كاملة</div></div></div>
+        <div style="display:flex; align-items:center; gap:10px;"><span class="streak-flame">🕌</span><div><div style="font-weight:800; font-size:18px;">${HABIT_KEYS.filter(k=>day[k]).length}/${HABIT_KEYS.length}</div><div class="muted" style="font-size:12.5px;">عبادات اليوم</div></div></div>
       </div>
     </div>
 
-    <div class="grid grid-2">
-      <div style="display:flex; flex-direction:column; gap:14px;">
-        ${HABIT_GROUPS.map(g=>`
-          <div class="card">
-            <h3 class="section-title" style="margin-bottom:12px; font-size:15px; color:var(--primary); display:flex; align-items:center; justify-content:between;">
-              <span>${g.title}</span>
-              ${g.obligatory?'<span class="pill" style="background:var(--primary-dim); color:var(--primary); font-size:10.5px;">تؤثر في الالتزام</span>':''}
-            </h3>
-            <div>
-              ${g.keys.map(([k,lbl])=>`
-                <div class="habit-row ${day[k]?'done':''}" onclick="toggleHabit('${k}')">
-                  <div class="chk">${day[k]?'✓':''}</div>
-                  <span class="label">${lbl}</span>
-                </div>
-              `).join('')}
-            </div>
+    ${HABIT_GROUPS.map(g=>`
+      <div class="card" style="margin-bottom:14px;">
+        <div class="section-title">${g.title}</div>
+        ${g.keys.map(([k,label])=>`
+          <div class="habit-row ${day[k]?'done':''}" onclick="bumpHabit(this,'${k}')">
+            <div class="chk">${day[k]?'✓':''}</div>
+            <div class="label">${label}</div>
           </div>
         `).join('')}
       </div>
+    `).join('')}
 
-      <div style="display:flex; flex-direction:column; gap:14px;">
-        <div class="card">
-          <h3 class="section-title">💡 راداد التركيز اليومي</h3>
-          <div id="homeFocusArea"></div>
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="section-title">آخر 7 أيام</div>
+        <div class="chart-bars">
+          ${last7DaysPct().map(d=>`<div class="chart-col"><div class="chart-fill" style="height:${d.pct}%"></div><div class="chart-lbl">${d.label}</div></div>`).join('')}
         </div>
-        <div class="card">
-          <h3 class="section-title">📖 آخر ما قرأت</h3>
-          <div id="homeQuranArea"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">آخر 4 أسابيع</div>
+        <div class="chart-bars">
+          ${monthWeeksPct().map(d=>`<div class="chart-col"><div class="chart-fill" style="height:${d.pct}%"></div><div class="chart-lbl">${d.label}</div></div>`).join('')}
         </div>
       </div>
     </div>
   `;
-  renderHomeFocus();
-  renderHomeQuran();
+}
+function bumpHabit(node, key){
+  node.classList.add('pop');
+  setTimeout(()=>node.classList.remove('pop'),350);
+  toggleHabit(key);
 }
 
-function renderHomeFocus(){
-  const area = $('#homeFocusArea');
-  if(!area) return;
-  const tk = todayKey();
-  const list = DB.focusTasks[tk] || [];
-  if(!list.length){
-    area.innerHTML = `<div class="muted" style="font-size:14px; padding:10px 0;">لا توجد مهام تركيز مضافة لليوم، يمكنك إضافتها من مركز التركيز.</div>
-    <button class="btn" style="width:100%; margin-top:6px;" onclick="navigate('focus')">🧠 اذهب لمركز التركيز</button>`;
-    return;
-  }
-  area.innerHTML = list.slice(0,3).map(t=>`
-    <div class="focus-task" style="border-radius:var(--radius-s); background:var(--bg-soft); margin-bottom:6px; font-size:14px;">
-      <span style="font-size:16px;">${t.done?'✅':'⏳'}</span>
-      <span style="flex:1; text-decoration:${t.done?'line-through':'none'}; opacity:${t.done?.6:1}">${esc(t.title)}</span>
-      <span class="pill">${t.pomoCount || 0} طماطم</span>
-    </div>
-  `).join('') + `<button class="btn btn-ghost" style="width:100%; font-size:13px; margin-top:4px;" onclick="navigate('focus')">عرض الكل</button>`;
-}
+/* ====================== QURAN PAGE — 114 SURAHS, AYAH-BASED ====================== */
+const QURAN_SURAHS = [
+  [1,'الفاتحة',7],[2,'البقرة',286],[3,'آل عمران',200],[4,'النساء',176],[5,'المائدة',120],
+  [6,'الأنعام',165],[7,'الأعراف',206],[8,'الأنفال',75],[9,'التوبة',129],[10,'يونس',109],
+  [11,'هود',123],[12,'يوسف',111],[13,'الرعد',43],[14,'إبراهيم',52],[15,'الحجر',99],
+  [16,'النحل',128],[17,'الإسراء',111],[18,'الكهف',110],[19,'مريم',98],[20,'طه',135],
+  [21,'الأنبياء',112],[22,'الحج',78],[23,'المؤمنون',118],[24,'النور',64],[25,'الفرقان',77],
+  [26,'الشعراء',227],[27,'النمل',93],[28,'القصص',88],[29,'العنكبوت',69],[30,'الروم',60],
+  [31,'لقمان',34],[32,'السجدة',30],[33,'الأحزاب',73],[34,'سبأ',54],[35,'فاطر',45],
+  [36,'يس',83],[37,'الصافات',182],[38,'ص',88],[39,'الزمر',75],[40,'غافر',85],
+  [41,'فصلت',54],[42,'الشورى',53],[43,'الزخرف',89],[44,'الدخان',59],[45,'الجاثية',37],
+  [46,'الأحقاف',35],[47,'محمد',38],[48,'الفتح',29],[49,'الحجرات',18],[50,'ق',45],
+  [51,'الذاريات',60],[52,'الطور',49],[53,'النجم',62],[54,'القمر',55],[55,'الرحمن',78],
+  [56,'الواقعة',96],[57,'الحديد',29],[58,'المجادلة',22],[59,'الحشر',24],[60,'الممتحنة',13],
+  [61,'الصف',14],[62,'الجمعة',11],[63,'المنافقون',11],[64,'التغابن',18],[65,'الطلاق',12],
+  [66,'التحريم',12],[67,'الملك',30],[68,'القلم',52],[69,'الحاقة',52],[70,'المعارج',44],
+  [71,'نوح',28],[72,'الجن',28],[73,'المزمل',20],[74,'المدثر',56],[75,'القيامة',40],
+  [76,'الإنسان',31],[77,'المرسلات',50],[78,'النبأ',40],[79,'النازعات',46],[80,'عبس',42],
+  [81,'التكوير',29],[82,'الإنفطار',19],[83,'المطففين',36],[84,'الإنشقاق',25],[85,'البروج',22],
+  [86,'الطارق',17],[87,'الأعلى',19],[88,'الغاشية',26],[89,'الفجر',30],[90,'البلد',20],
+  [91,'الشمس',15],[92,'الليل',21],[93,'الضحى',11],[94,'الشرح',8],[95,'التين',8],
+  [96,'العلق',19],[97,'القدر',5],[98,'البينة',8],[99,'الزلزلة',8],[100,'العاديات',11],
+  [101,'القارعة',11],[102,'التكاثر',8],[103,'العصر',3],[104,'الهمزة',9],[105,'الفيل',5],
+  [106,'قريش',4],[107,'الماعون',7],[108,'الكوثر',3],[109,'الكافرون',6],[110,'النصر',3],
+  [111,'المسد',5],[112,'الإخلاص',4],[113,'الفلق',5],[114,'الناس',6],
+].map(([n,name,ayat])=>({n,name,ayat}));
+const QURAN_TOTAL_AYAT = QURAN_SURAHS.reduce((s,x)=>s+x.ayat,0);
 
-function renderHomeQuran(){
-  const area = $('#homeQuranArea');
-  if(!area) return;
-  const p = DB.quranProgress;
-  if(!p.surah){
-    area.innerHTML = `<div class="muted" style="font-size:14px; padding:10px 0;">لم تسجل أي تقدم في الحفظ بعد.</div>
-    <button class="btn" style="width:100%; margin-top:6px;" onclick="navigate('quran')">📖 ابدأ الحفظ الآن</button>`;
-    return;
-  }
-  area.innerHTML = `
-    <div style="background:var(--accent-soft); padding:14px; border-radius:var(--radius-m); border:1px solid var(--accent); margin-bottom:10px;">
-      <div style="font-weight:800; font-size:16px; color:var(--accent);" class="font-amiri">سورة ${esc(p.surah)}</div>
-      <div class="muted" style="font-size:13.5px; margin-top:4px;">وصلت إلى الآية: ${p.aya || 0}</div>
-      ${p.notes?`<div style="font-size:12.5px; margin-top:8px; border-top:1px dashed var(--border); padding-top:6px;" class="muted">ملاحظة: ${esc(p.notes)}</div>`:''}
-    </div>
-    <button class="btn" style="width:100%;" onclick="navigate('quran')">📖 تحديث الورد المالي</button>
-  `;
+function getSurahProgress(n){ if(!DB.quranProgress[n]) DB.quranProgress[n]={memorized:0, reviewed:false}; return DB.quranProgress[n]; }
+function quranStats(){
+  let memorizedAyat=0, fullCount=0, reviewedCount=0;
+  QURAN_SURAHS.forEach(s=>{
+    const p = DB.quranProgress[s.n];
+    if(!p) return;
+    const m = clamp(Number(p.memorized||0),0,s.ayat);
+    memorizedAyat += m;
+    if(m>=s.ayat){ fullCount++; if(p.reviewed) reviewedCount++; }
+  });
+  return {memorizedAyat, fullCount, reviewedCount, totalAyat:QURAN_TOTAL_AYAT};
 }
-
-/* ====================== QURAN PAGE ====================== */
+let quranFilter = 'الكل';
+let quranSearch = '';
 function renderQuran(){
-  const q = $('#page-quran');
-  const p = DB.quranProgress;
-  q.innerHTML = `
-    <div class="card" style="max-width:520px; margin:20px auto;">
-      <h2 class="section-title" style="font-size:20px; color:var(--primary);" class="font-amiri">📖 متابعة ورد حفظ القرآن</h2>
-      <p class="muted" style="font-size:14px; margin-bottom:16px;">سجل آخر سورة وآية قمت بحفظها ومراجعتها لتتبع تقدمك المالي.</p>
-      <div class="field"><label>اسم السورة</label><input id="qSurah" value="${esc(p.surah)}" placeholder="مثال: البقرة"></div>
-      <div class="field"><label>رقم الآية</label><input id="qAya" type="number" value="${p.aya || ''}" placeholder="مثال: 105"></div>
-      <div class="field"><label>ملاحظات أو روابط مراجعة</label><textarea id="qNotes" placeholder="اكتب أي ملاحظة للحفظ هنا...">${esc(p.notes)}</textarea></div>
-      <button class="btn btn-primary" style="width:100%; margin-top:8px;" onclick="saveQuranProgress()">حفظ التقدم</button>
+  const el = $('#page-quran'); if(!el) return;
+  const st = quranStats();
+  const pct = clamp(Math.round((st.memorizedAyat/st.totalAyat)*100),0,100);
+
+  const filtered = QURAN_SURAHS.filter(s=>{
+    if(quranSearch && !s.name.includes(quranSearch)) return false;
+    const p = DB.quranProgress[s.n];
+    const m = p ? clamp(Number(p.memorized||0),0,s.ayat) : 0;
+    const full = m>=s.ayat;
+    const reviewed = full && p && p.reviewed;
+    if(quranFilter==='قيد الحفظ') return m>0 && !full;
+    if(quranFilter==='محفوظة') return full;
+    if(quranFilter==='تمت مراجعتها') return reviewed;
+    return true;
+  });
+
+  el.innerHTML = `
+    <div class="card" style="text-align:center; margin-bottom:16px; background:linear-gradient(145deg, var(--primary-dim), var(--bg-elevated));">
+      <div class="font-amiri" style="font-size:22px; font-weight:700;">"خيركم من تعلم القرآن وعلمه"</div>
     </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div class="section-title" style="margin:0;">التقدم الكلي — 114 سورة</div>
+        <span class="pill">${pct}%</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+      <div class="muted" style="font-size:12px; margin-top:6px;">${st.memorizedAyat} / ${st.totalAyat} آية</div>
+    </div>
+
+    <div class="grid grid-3" style="margin-bottom:16px;">
+      <div class="card"><div style="font-weight:900; font-size:22px;">${st.fullCount}/114</div><div class="muted" style="font-size:12.5px;">سور محفوظة بالكامل</div></div>
+      <div class="card"><div style="font-weight:900; font-size:22px;">${st.reviewedCount}</div><div class="muted" style="font-size:12.5px;">سور تم حفظها ومراجعتها</div></div>
+      <div class="card"><div style="font-weight:900; font-size:22px;">${st.memorizedAyat}</div><div class="muted" style="font-size:12.5px;">إجمالي الآيات المحفوظة</div></div>
+    </div>
+
+    <input id="quranSearchInput" placeholder="🔍 ابحث عن سورة..." value="${esc(quranSearch)}" style="margin-bottom:12px;" oninput="setQuranSearch(this.value)">
+    <div class="tab-row">
+      ${['الكل','قيد الحفظ','محفوظة','تمت مراجعتها'].map(f=>`<button class="tab-btn ${quranFilter===f?'active':''}" onclick="setQuranFilter('${f}')">${f}</button>`).join('')}
+    </div>
+
+    ${filtered.length===0 ? emptyState('📖','لا توجد نتائج','جرّب كلمة بحث أخرى') : filtered.map(s=>{
+      const p = DB.quranProgress[s.n];
+      const m = p ? clamp(Number(p.memorized||0),0,s.ayat) : 0;
+      const full = m>=s.ayat;
+      const reviewed = full && p && p.reviewed;
+      return `
+      <div class="habit-row ${full?'done':''}" style="${reviewed?'border-color:var(--accent); background:var(--accent-soft);':''}" onclick="openSurahModal(${s.n})">
+        <div class="chk" style="${reviewed?'background:var(--accent); border-color:var(--accent); color:#fff;':''}">${full?(reviewed?'★':'✓'):''}</div>
+        <div class="label" style="${reviewed?'color:var(--accent); text-decoration:line-through; text-decoration-thickness:1.5px;':''}">
+          ${s.n}. ${s.name}
+          <span class="muted" style="font-weight:500; font-size:12.5px;"> — ${m}/${s.ayat} آية</span>
+        </div>
+      </div>`;
+    }).join('')}
   `;
 }
-function saveQuranProgress(){
-  DB.quranProgress = {
-    surah: $('#qSurah').value.trim(),
-    aya: parseInt($('#qAya').value,10) || 0,
-    notes: $('#qNotes').value.trim(),
-    updatedAt: new Date().toISOString()
-  };
-  persist.quranProgress();
-  showToast('تم حفظ تقدمك في القرآن الكريم','📖');
-  checkAchievements();
+function emptyState(icon,title,sub){
+  return `<div class="empty-state"><div class="ic">${icon}</div><div style="font-weight:700; color:var(--text);">${title}</div><div style="font-size:13px;">${sub}</div></div>`;
+}
+function setQuranFilter(f){ quranFilter=f; renderQuran(); }
+function setQuranSearch(v){ quranSearch=v.trim(); renderQuran(); }
+function openSurahModal(n){
+  const s = QURAN_SURAHS.find(x=>x.n===n); if(!s) return;
+  const p = getSurahProgress(n);
+  openModal(`
+    <div class="modal-head"><h3>${s.n}. سورة ${s.name}</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
+    <div class="field">
+      <label>عدد الآيات المحفوظة (من أصل ${s.ayat})</label>
+      <input id="surAyat" type="number" min="0" max="${s.ayat}" value="${p.memorized||0}">
+    </div>
+    <div class="habit-row" id="surReviewRow" style="margin-top:4px;" onclick="toggleSurReview()">
+      <div class="chk" id="surReviewChk" style="${p.reviewed?'background:var(--accent); border-color:var(--accent); color:#fff;':''}">${p.reviewed?'✓':''}</div>
+      <div class="label">تمت المراجعة</div>
+    </div>
+    <button class="btn btn-primary" style="width:100%; margin-top:14px;" onclick="saveSurah(${n})">حفظ</button>
+  `);
+  window.__surReviewed = p.reviewed||false;
+}
+function toggleSurReview(){
+  window.__surReviewed = !window.__surReviewed;
+  const chk = $('#surReviewChk');
+  chk.style.background = window.__surReviewed ? 'var(--accent)' : '';
+  chk.style.borderColor = window.__surReviewed ? 'var(--accent)' : '';
+  chk.style.color = window.__surReviewed ? '#fff' : '';
+  chk.textContent = window.__surReviewed ? '✓' : '';
+}
+function saveSurah(n){
+  const s = QURAN_SURAHS.find(x=>x.n===n); if(!s) return;
+  const p = getSurahProgress(n);
+  const wasFull = p.memorized>=s.ayat;
+  p.memorized = clamp(Number($('#surAyat').value)||0, 0, s.ayat);
+  p.reviewed = !!window.__surReviewed && p.memorized>=s.ayat;
+  persist.quranProgress(); closeModal(); checkAchievements();
+  if(p.memorized>=s.ayat && !wasFull) celebrateSurah(s.name);
+  else randomMotivation();
+  renderQuran();
+}
+function celebrateSurah(name){
+  showToast(`بارك الله فيك، أتممت حفظ سورة ${name} 🌙`, '📖');
 }
 
 /* ====================== BOOKS PAGE ====================== */
+const BOOK_STATUSES = ['أقرأه حالياً','انتهيت منه','سأقرأه لاحقاً'];
+let booksFilter = 'الكل';
+const BOOK_COVERS = ['#1F6F54','#B6862F','#C4543F','#2F6FA8','#7A4FA8','#3F8F6F'];
 function renderBooks(){
-  const b = $('#page-books');
-  if(!DB.books.length){
-    b.innerHTML = `<div class="empty-state"><div class="ic">📚</div><p>لم تضف أي كتب لمكتبتك بعد.</p></div>`;
-    return;
-  }
-  b.innerHTML = `<div class="grid grid-3">${DB.books.map((x,i)=>`
-    <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
-      <div>
-        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:6px;">
-          <h3 style="margin:0 0 4px 0; font-size:16px; font-weight:800;">${esc(x.title)}</h3>
-          <button class="btn btn-icon btn-ghost" style="width:28px; height:28px; font-size:12px; color:var(--danger);" onclick="deleteBook('${x.id}')">✕</button>
-        </div>
-        <div class="muted" style="font-size:13px; margin-bottom:10px;">تأليف: ${esc(x.author || 'غير معروف')}</div>
-        <div style="font-size:20px; margin-bottom:12px;">${'★'.repeat(x.rating || 0)}${'☆'.repeat(5-(x.rating||0))}</div>
-      </div>
-      <div>
-        <div style="font-size:13px; display:flex; justify-content:space-between; margin-bottom:6px;" class="muted">
-          <span>التقدم: ${x.progress || 0} من ${x.pages || 0} صفحة</span>
-          <span>${Math.round(((x.progress||0)/(x.pages||1))*100)}%</span>
-        </div>
-        <div class="bar-track"><div class="bar-fill" style="width:${((x.progress||0)/(x.pages||1))*100}%"></div></div>
-        <button class="btn" style="width:100%; margin-top:12px; font-size:12.5px; padding:6px 12px;" onclick="openUpdateBookProgressModal('${x.id}')">تحديث التقدم</button>
-      </div>
+  const el = $('#page-books'); if(!el) return;
+  const filtered = booksFilter==='الكل' ? DB.books : DB.books.filter(b=>b.status===booksFilter);
+  el.innerHTML = `
+    <div class="tab-row">
+      ${['الكل', ...BOOK_STATUSES].map(s=>`<button class="tab-btn ${booksFilter===s?'active':''}" onclick="setBooksFilter('${s}')">${s}</button>`).join('')}
     </div>
-  `).join('')}</div>`;
+    ${filtered.length===0 ? emptyState('📚','مكتبتك فارغة','أضف أول كتاب لك بالضغط على +') : `
+      <div class="grid grid-3">
+        ${filtered.map((b,i)=>{
+          const pct = b.totalPages>0 ? clamp(Math.round((b.currentPages/b.totalPages)*100),0,100) : 0;
+          const color = BOOK_COVERS[DB.books.indexOf(b)%BOOK_COVERS.length];
+          return `
+          <div class="card">
+            <div style="height:110px; border-radius:12px; background:linear-gradient(150deg, ${color}, ${color}cc); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:14px; text-align:center; padding:10px; margin-bottom:10px;">${esc(b.title)}</div>
+            <div style="font-weight:800; font-size:15px;">${esc(b.title)}</div>
+            <div class="muted" style="font-size:12.5px; margin-bottom:6px;">${esc(b.author||'—')} · ${esc(b.category||'')}</div>
+            <div class="pill" style="margin-bottom:8px;">${b.status}</div>
+            <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:4px;"><span>${b.currentPages||0}/${b.totalPages||0} صفحة</span><span>${pct}%</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+            <div class="star-row" style="margin:10px 0;">${[1,2,3,4,5].map(n=>`<span class="star ${n<=(b.rating||0)?'on':''}" onclick="rateBook('${b.id}',${n})">★</span>`).join('')}</div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn" style="flex:1; font-size:12.5px;" onclick="openBookProgressModal('${b.id}')">تحديث</button>
+              <button class="btn btn-icon btn-danger-ghost" onclick="deleteBook('${b.id}')">🗑</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    `}
+  `;
 }
+function setBooksFilter(s){ booksFilter=s; renderBooks(); }
 function openBookModal(){
   openModal(`
-    <div class="modal-head"><h3>إضافة كتاب جديد</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field"><label>عنوان الكتاب</label><input id="bTitle"></div>
-    <div class="field"><label>المؤلف</label><input id="bAuthor"></div>
-    <div class="grid grid-2">
-      <div class="field"><label>إجمالي الصفحات</label><input id="bPages" type="number"></div>
-      <div class="field"><label>الصفحة الحالية</label><input id="bProg" type="number" value="0"></div>
-    </div>
-    <div class="field"><label>تقييمك</label><div class="star-row" id="modalStars">${[1,2,3,4,5].map(n=>`<span class="star" onclick="setModalStars(${n})">★</span>`).join('')}</div></div>
-    <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="saveBook()">إضافة للمكتبة</button>
+    <div class="modal-head"><h3>إضافة كتاب</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
+    <div class="field"><label>عنوان الكتاب</label><input id="bTitle" placeholder="اسم الكتاب"></div>
+    <div class="field"><label>المؤلف</label><input id="bAuthor" placeholder="اسم المؤلف"></div>
+    <div class="field"><label>التصنيف</label><input id="bCategory" placeholder="مثال: تطوير ذات"></div>
+    <div class="field"><label>الحالة</label><select id="bStatus">${BOOK_STATUSES.map(s=>`<option>${s}</option>`).join('')}</select></div>
+    <div class="field"><label>إجمالي الصفحات</label><input id="bTotal" type="number" min="1" placeholder="300"></div>
+    <button class="btn btn-primary" style="width:100%;" onclick="saveBook()">إضافة الكتاب</button>
   `);
-  window._modalRating = 0;
-}
-function setModalStars(n){
-  window._modalRating = n;
-  $$('#modalStars .star').forEach((el,i)=>el.classList.toggle('on', i<n));
 }
 function saveBook(){
-  const title = $('#bTitle').value.trim();
-  if(!title) return;
-  DB.books.push({
-    id: uid(), title, author: $('#bAuthor').value.trim(),
-    pages: parseInt($('#bPages').value,10)||100, progress: parseInt($('#bProg').value,10)||0,
-    rating: window._modalRating||0
-  });
-  persist.books(); closeModal(); renderBooks(); showToast('تمت إضافة الكتاب للمكتبة','📚');
+  const title = $('#bTitle').value.trim(); if(!title) return;
+  DB.books.push({id:uid(), title, author:$('#bAuthor').value.trim(), category:$('#bCategory').value.trim(),
+    status:$('#bStatus').value, totalPages:Number($('#bTotal').value)||0, currentPages:0, rating:0, notes:''});
+  persist.books(); closeModal(); renderBooks();
 }
-function deleteBook(id){
-  if(!confirm('هل متأكد من حذف هذا الكتاب؟')) return;
-  DB.books = DB.books.filter(x=>x.id!==id);
+function rateBook(id,n){
+  const b = DB.books.find(x=>x.id===id); if(!b) return;
+  b.rating = (b.rating===n) ? 0 : n;
   persist.books(); renderBooks();
 }
-function openUpdateBookProgressModal(id){
+function deleteBook(id){ DB.books = DB.books.filter(b=>b.id!==id); persist.books(); renderBooks(); }
+function openBookProgressModal(id){
   const b = DB.books.find(x=>x.id===id); if(!b) return;
   openModal(`
-    <div class="modal-head"><h3>تحديث تقدم: ${esc(b.title)}</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field"><label>الصفحة الحالية (من ${b.pages})</label><input id="buProg" type="number" value="${b.progress}"></div>
-    <button class="btn btn-primary" style="width:100%;" onclick="saveBookProgress('${id}')">تحديث</button>
+    <div class="modal-head"><h3>${esc(b.title)}</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
+    <div class="field"><label>الصفحات المقروءة</label><input id="bCur" type="number" min="0" max="${b.totalPages}" value="${b.currentPages||0}"></div>
+    <div class="field"><label>الحالة</label><select id="bStatusEdit">${BOOK_STATUSES.map(s=>`<option ${b.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+    <div class="field"><label>ملاحظات ودروس مستفادة</label><textarea id="bNotes" rows="4" placeholder="اكتب ما تعلمته...">${esc(b.notes||'')}</textarea></div>
+    <button class="btn btn-primary" style="width:100%;" onclick="saveBookProgress('${id}')">حفظ</button>
   `);
 }
 function saveBookProgress(id){
   const b = DB.books.find(x=>x.id===id); if(!b) return;
-  b.progress = clamp(parseInt($('#buProg').value,10)||0, 0, b.pages);
-  persist.books(); closeModal(); renderBooks(); showToast('تم تحديث تقدم القراءة','📚');
-  checkAchievements();
+  const newPages = clamp(Number($('#bCur').value)||0, 0, b.totalPages||999999);
+  const increased = newPages > (b.currentPages||0);
+  b.currentPages = newPages; b.status = $('#bStatusEdit').value; b.notes = $('#bNotes').value.trim();
+  persist.books(); closeModal(); checkAchievements();
+  if(increased) randomMotivation();
+  renderBooks();
 }
 
 /* ====================== JOURNAL PAGE ====================== */
+const JOURNAL_CATS = ['يوميات','أفكار','دراسة','عمل','أهداف'];
+let journalFilter = 'الكل';
 function renderJournal(){
-  const j = $('#page-journal');
-  if(!DB.journal.length){
-    j.innerHTML = `<div class="empty-state"><div class="ic">✍️</div><p>لم تكتب أي خواطر أو يوميات بعد.</p></div>`;
-    return;
-  }
-  j.innerHTML = `<div style="max-width:700px; margin:0 auto; display:flex; flex-direction:column; gap:14px;">${DB.journal.map(x=>`
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-        <div style="font-size:13px; font-weight:700;" class="muted">${esc(x.date)}</div>
-        <button class="btn btn-icon btn-ghost" style="width:28px; height:28px; color:var(--danger);" onclick="deleteJournal('${x.id}')">✕</button>
-      </div>
-      <div style="font-size:15px; line-height:1.6; white-space:pre-wrap;">${esc(x.content)}</div>
+  const el = $('#page-journal'); if(!el) return;
+  const filtered = (journalFilter==='الكل' ? DB.journal : DB.journal.filter(j=>j.category===journalFilter))
+    .slice().sort((a,b)=> b.date.localeCompare(a.date));
+  el.innerHTML = `
+    <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="openBrainDump()">⚡ فضفضة سريعة</button>
+      <button class="btn" onclick="openJournalModal()">✍️ تدوينة جديدة</button>
     </div>
-  `).join('')}</div>`;
+    <div class="tab-row">
+      ${['الكل', ...JOURNAL_CATS].map(c=>`<button class="tab-btn ${journalFilter===c?'active':''}" onclick="setJournalFilter('${c}')">${c}</button>`).join('')}
+    </div>
+    ${filtered.length===0 ? emptyState('✍️','لا توجد تدوينات بعد','ابدأ بكتابة أفكارك أو يومياتك') : filtered.map(j=>`
+      <div class="card" style="margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <div style="font-weight:800; font-size:16px;">${esc(j.title||'بدون عنوان')}</div>
+            <div class="muted" style="font-size:12px;">${esc(j.date)} · <span class="pill" style="padding:2px 9px;">${esc(j.category)}</span></div>
+          </div>
+          <button class="btn btn-icon btn-danger-ghost" onclick="deleteJournal('${j.id}')">🗑</button>
+        </div>
+        <div style="margin-top:10px; font-size:14.5px; line-height:1.9; white-space:pre-wrap;">${esc(j.content)}</div>
+      </div>
+    `).join('')}
+  `;
 }
+function setJournalFilter(c){ journalFilter=c; renderJournal(); }
 function openJournalModal(){
   openModal(`
-    <div class="modal-head"><h3>كتابة خاطرة / يوميات</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field"><label>تاريخ اليوم</label><input id="jDate" value="${gregorianStr()}"></div>
-    <div class="field"><label>ماذا يدور في ذهنك؟ (يمكنك استخدام الاختصار Ctrl + S للحفظ الذكي الفوري)</label><textarea id="jContent" style="height:140px;" placeholder="اكتب بحرية..."></textarea></div>
-    <button class="btn btn-primary" style="width:100%;" onclick="saveJournal()">تدوين</button>
+    <div class="modal-head"><h3>تدوينة جديدة</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
+    <div class="field"><label>العنوان</label><input id="jTitle" placeholder="عنوان التدوينة"></div>
+    <div class="field"><label>التصنيف</label><select id="jCategory">${JOURNAL_CATS.map(c=>`<option>${c}</option>`).join('')}</select></div>
+    <div class="field"><label>المحتوى</label><textarea id="jContent" rows="6" placeholder="اكتب هنا..."></textarea></div>
+    <button class="btn btn-primary" style="width:100%;" onclick="saveJournal()">حفظ التدوينة</button>
   `);
 }
 function saveJournal(){
-  const content = $('#jContent').value.trim();
-  if(!content) return;
-  DB.journal.unshift({ id: uid(), date: $('#jDate').value.trim(), content });
-  persist.journal(); closeModal(); renderJournal(); showToast('تم التدوين بنجاح','✍️');
+  const content = $('#jContent').value.trim(); if(!content) return;
+  DB.journal.push({id:uid(), title:$('#jTitle').value.trim(), category:$('#jCategory').value, content, date:todayKey()});
+  persist.journal(); closeModal(); checkAchievements(); randomMotivation(); renderJournal();
 }
-function deleteJournal(id){
-  if(!confirm('هل تريد حذف هذه الخاطرة؟')) return;
-  DB.journal = DB.journal.filter(x=>x.id!==id);
-  persist.journal(); renderJournal();
+function openBrainDump(){
+  openModal(`
+    <div class="modal-head"><h3>⚡ فضفضة سريعة</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
+    <textarea id="dumpContent" rows="8" placeholder="اكتب كل ما يدور في ذهنك الآن، بدون تنسيق، فقط فرّغ أفكارك..." autofocus></textarea>
+    <button class="btn btn-primary" style="width:100%; margin-top:12px;" onclick="saveBrainDump()">حفظ</button>
+  `);
 }
-
-/* ====================== COURSES PAGE ====================== */
-function renderCourses(){
-  const c = $('#page-courses');
-  
-  // بناء الواجهة مع شريط البحث والتصفية المطورين
-  c.innerHTML = `
-    <div class="card" style="margin-bottom:20px;">
-      <div class="grid grid-2" style="gap:10px;">
-        <input type="text" id="courseSearchInput" placeholder="🔍 ابحث عن اسم كورس أو مهارة..." oninput="filterCoursesList()">
-        <select id="courseCategoryFilter" onchange="filterCoursesList()">
-          <option value="all">📁 كل التصنيفات</option>
-          <option value="برمجة">💻 برمجة وتطوير</option>
-          <option value="علم نفس">🧠 علم نفس وتطوير ذاتي</option>
-          <option value="لغات">🗣️ لغات وثقافة</option>
-          <option value="أخرى">✨ تصنيفات أخرى</option>
-        </select>
-      </div>
-    </div>
-    <div id="coursesItemsGrid"></div>
-  `;
-  
-  filterCoursesList();
+function saveBrainDump(){
+  const content = $('#dumpContent').value.trim(); if(!content) return;
+  DB.journal.push({id:uid(), title:'فضفضة سريعة', category:'أفكار', content, date:todayKey()});
+  persist.journal(); closeModal(); checkAchievements(); showToast('تم حفظ أفكارك بأمان','💭'); renderJournal();
 }
+function deleteJournal(id){ DB.journal = DB.journal.filter(j=>j.id!==id); persist.journal(); renderJournal(); }
 
-function filterCoursesList(){
-  const grid = $('#coursesItemsGrid');
-  if(!grid) return;
-  
-  const query = $('#courseSearchInput')?.value.toLowerCase().trim() || '';
-  const cat = $('#courseCategoryFilter')?.value || 'all';
-  
-  const filtered = DB.courses.filter(x => {
-    const matchesSearch = x.title.toLowerCase().includes(query) || (x.platform && x.platform.toLowerCase().includes(query));
-    const matchesCat = (cat === 'all') || (x.category === cat);
-    return matchesSearch && matchesCat;
-  });
-
-  if(!filtered.length){
-    grid.innerHTML = `<div class="empty-state"><div class="ic">🎓</div><p>لا توجد كورسات مطابقة للبحث الحالي.</p></div>`;
-    return;
+/* ====================== COURSES PAGE — per-session checkboxes ====================== */
+const COURSE_STATUSES = ['أتابعه حالياً','مكتمل','متوقف'];
+function ensureSessions(c){
+  if(!Array.isArray(c.sessions) || c.sessions.length!==c.total){
+    const old = c.sessions||[];
+    c.sessions = Array.from({length:c.total}, (_,i)=>!!old[i]);
   }
-
-  grid.innerHTML = `<div class="grid grid-3">${filtered.map(x=>`
-    <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
-      <div>
-        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:6px;">
-          <span class="pill" style="background:var(--primary-dim); color:var(--primary); font-size:11px;">${esc(x.category || 'عام')}</span>
-          <button class="btn btn-icon btn-ghost" style="width:28px; height:28px; color:var(--danger);" onclick="deleteCourse('${x.id}')">✕</button>
-        </div>
-        <h3 style="margin:10px 0 4px 0; font-size:16px; font-weight:800;">${esc(x.title)}</h3>
-        <div class="muted" style="font-size:13px; margin-bottom:12px;">المنصة: ${esc(x.platform || 'غير محددة')}</div>
-      </div>
-      <div>
-        <div style="font-size:12.5px; display:flex; justify-content:space-between; margin-bottom:6px;" class="muted">
-          <span>التقدم: ${x.completedHours || 0} من ${x.totalHours || 0} ساعة</span>
-          <span>${Math.round(((x.completedHours||0)/(x.totalHours||1))*100)}%</span>
-        </div>
-        <div class="bar-track"><div class="bar-fill" style="width:${((x.completedHours||0)/(x.totalHours||1))*100}%"></div></div>
-        <button class="btn" style="width:100%; margin-top:12px; font-size:12.5px; padding:6px 12px;" onclick="openUpdateCourseModal('${x.id}')">تحديث الساعات</button>
-      </div>
-    </div>
-  `).join('')}</div>`;
+  return c.sessions;
 }
-
+function renderCourses(){
+  const el = $('#page-courses'); if(!el) return;
+  el.innerHTML = `
+    ${DB.courses.length===0 ? emptyState('🎓','لا توجد كورسات بعد','أضف كورساً جديداً للبدء بمتابعة تقدمك') : `
+      <div class="grid grid-2">
+        ${DB.courses.map(c=>{
+          const sessions = ensureSessions(c);
+          const completed = sessions.filter(Boolean).length;
+          const pct = c.total>0 ? clamp(Math.round((completed/c.total)*100),0,100):0;
+          return `
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <div style="font-weight:800; font-size:16px;">${esc(c.title)}</div>
+                <div class="muted" style="font-size:12.5px;">${esc(c.instructor||'—')} · ${esc(c.platform||'')}</div>
+              </div>
+              <button class="btn btn-icon btn-danger-ghost" onclick="deleteCourse('${c.id}')">🗑</button>
+            </div>
+            <div class="pill" style="margin:8px 0;">${c.status}</div>
+            <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;"><span>${completed}/${c.total} حصة</span><span>${pct}%</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+            <div style="display:flex; gap:8px; margin-top:12px;">
+              ${c.link ? `<a href="${esc(c.link)}" target="_blank" rel="noopener" class="btn btn-icon" title="فتح رابط السلسلة">🔗</a>` : ''}
+              <button class="btn btn-primary" style="flex:1;" onclick="openCourseSessionsModal('${c.id}')">عرض الحصص ✓</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    `}
+  `;
+}
 function openCourseModal(){
   openModal(`
-    <div class="modal-head"><h3>إضافة كورس جديد</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field"><label>اسم الكورس / المهارة</label><input id="cTitle"></div>
-    <div class="field"><label>المنصة / المعلم</label><input id="cPlatform"></div>
-    <div class="field">
-      <label>التصنيف</label>
-      <select id="cCategory">
-        <option value="برمجة">💻 برمجة وتطوير</option>
-        <option value="علم نفس">🧠 علم نفس وتطوير ذاتي</option>
-        <option value="لغات">🗣️ لغات وثقافة</option>
-        <option value="أخرى">✨ أخرى</option>
-      </select>
-    </div>
-    <div class="grid grid-2">
-      <div class="field"><label>إجمالي الساعات</label><input id="cTotal" type="number"></div>
-      <div class="field"><label>الساعات المكتملة</label><input id="cDone" type="number" value="0"></div>
-    </div>
-    <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="saveCourse()">إضافة الكورس</button>
+    <div class="modal-head"><h3>إضافة كورس</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
+    <div class="field"><label>عنوان الكورس</label><input id="cTitle" placeholder="اسم الكورس"></div>
+    <div class="field"><label>اسم المدرّب</label><input id="cInstructor" placeholder="اسم المدرّب"></div>
+    <div class="field"><label>المنصة</label><input id="cPlatform" placeholder="مثال: يوتيوب، يوديمي"></div>
+    <div class="field"><label>إجمالي الحصص</label><input id="cTotal" type="number" min="1" placeholder="33"></div>
+    <div class="field"><label>رابط السلسلة (اختياري)</label><input id="cLink" type="url" placeholder="https://..."></div>
+    <button class="btn btn-primary" style="width:100%;" onclick="saveCourse()">إضافة الكورس</button>
   `);
 }
 function saveCourse(){
-  const title = $('#cTitle').value.trim();
-  if(!title) return;
-  DB.courses.push({
-    id: uid(), title, platform: $('#cPlatform').value.trim(),
-    category: $('#cCategory').value,
-    totalHours: parseFloat($('#cTotal').value)||10, completedHours: parseFloat($('#cDone').value)||0
-  });
-  persist.courses(); closeModal(); renderCourses(); showToast('تم إضافة الكورس بنجاح','🎓');
+  const title = $('#cTitle').value.trim(); if(!title) return;
+  const total = Number($('#cTotal').value)||1;
+  DB.courses.push({id:uid(), title, instructor:$('#cInstructor').value.trim(), platform:$('#cPlatform').value.trim(),
+    total, sessions:Array.from({length:total},()=>false), status:'أتابعه حالياً', link:$('#cLink').value.trim()});
+  persist.courses(); closeModal(); renderCourses();
 }
-function deleteCourse(id){
-  if(!confirm('هل تريد حذف هذا الكورس؟')) return;
-  DB.courses = DB.courses.filter(x=>x.id!==id);
-  persist.courses(); renderCourses();
-}
-function openUpdateCourseModal(id){
+function openCourseSessionsModal(id){
   const c = DB.courses.find(x=>x.id===id); if(!c) return;
+  const sessions = ensureSessions(c);
   openModal(`
-    <div class="modal-head"><h3>تحديث ساعات كورس: ${esc(c.title)}</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field"><label>الساعات المكتملة حالياً (من ${c.totalHours})</label><input id="cuHours" type="number" step="0.1" value="${c.completedHours}"></div>
-    <button class="btn btn-primary" style="width:100%;" onclick="saveCourseProgress('${id}')">تحديث</button>
+    <div class="modal-head"><h3>${esc(c.title)}</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
+    <div class="field">
+      <label>رابط السلسلة</label>
+      <div style="display:flex; gap:8px;">
+        <input id="courseLinkInput" type="url" value="${esc(c.link||'')}" placeholder="https://...">
+        <button class="btn" onclick="saveCourseLink('${c.id}')">حفظ</button>
+      </div>
+    </div>
+    <div class="muted" style="font-size:12.5px; margin-bottom:10px;">اضغط على رقم الحصة بعد ما تخلّصها</div>
+    <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:8px;">
+      ${sessions.map((done,i)=>`
+        <button onclick="toggleCourseSession('${c.id}',${i})"
+          style="aspect-ratio:1; border-radius:10px; border:1px solid ${done?'var(--success)':'var(--border)'}; background:${done?'var(--success)':'var(--bg-soft)'}; color:${done?'#fff':'var(--text)'}; font-weight:700; font-size:13px;">
+          ${i+1}
+        </button>
+      `).join('')}
+    </div>
   `);
 }
-function saveCourseProgress(id){
+function toggleCourseSession(id,i){
   const c = DB.courses.find(x=>x.id===id); if(!c) return;
-  c.completedHours = clamp(parseFloat($('#cuHours').value)||0, 0, c.totalHours);
-  persist.courses(); closeModal(); renderCourses(); showToast('تم تحديث الساعات المكتملة','🎓');
-  checkAchievements();
+  const sessions = ensureSessions(c);
+  sessions[i] = !sessions[i];
+  const completed = sessions.filter(Boolean).length;
+  if(completed>=c.total) c.status='مكتمل'; else if(c.status==='مكتمل') c.status='أتابعه حالياً';
+  persist.courses(); checkAchievements();
+  if(sessions[i]) randomMotivation();
+  openCourseSessionsModal(id);
+  renderCourses();
+}
+function deleteCourse(id){ DB.courses = DB.courses.filter(c=>c.id!==id); persist.courses(); renderCourses(); }
+function saveCourseLink(id){
+  const c = DB.courses.find(x=>x.id===id); if(!c) return;
+  c.link = $('#courseLinkInput').value.trim();
+  persist.courses(); showToast('تم حفظ الرابط','🔗'); renderCourses();
 }
 
-/* ====================== LESSONS PAGE ====================== */
-function renderLessons(){
-  const l = $('#page-lessons');
-  
-  // بناء الواجهة مع تصفية ذكية متقدمة للدروس الشرعية والدينية
-  l.innerHTML = `
-    <div class="card" style="margin-bottom:20px;">
-      <div class="grid grid-2" style="gap:10px;">
-        <input type="text" id="lessonSearchInput" placeholder="🔍 ابحث عن عنوان درس أو شيخ..." oninput="filterLessonsList()">
-        <select id="lessonCategoryFilter" onchange="filterLessonsList()">
-          <option value="all">🕌 كل العلوم</option>
-          <option value="عقيدة">💎 عقيدة</option>
-          <option value="حديث">📜 حديث</option>
-          <option value="فقه">⚖️ فقه وسيرة</option>
-          <option value="تزكية">🌱 تزكية ورقائق</option>
-        </select>
-      </div>
-    </div>
-    <div id="lessonsItemsGrid"></div>
-  `;
-  
-  filterLessonsList();
-}
-
-function filterLessonsList(){
-  const grid = $('#lessonsItemsGrid');
-  if(!grid) return;
-  
-  const query = $('#lessonSearchInput')?.value.toLowerCase().trim() || '';
-  const type = $('#lessonCategoryFilter')?.value || 'all';
-  
-  const filtered = DB.lessons.filter(x => {
-    const matchesSearch = x.title.toLowerCase().includes(query) || (x.sheikh && x.sheikh.toLowerCase().includes(query));
-    const matchesType = (type === 'all') || (x.type === type);
-    return matchesSearch && matchesType;
-  });
-
-  if(!filtered.length){
-    grid.innerHTML = `<div class="empty-state"><div class="ic">🕌</div><p>لا توجد دروس دينية تطابق البحث الحالي.</p></div>`;
-    return;
+/* ====================== ISLAMIC LESSONS PAGE — per-episode checkboxes ====================== */
+function ensureEpisodes(c){
+  if(!Array.isArray(c.episodes) || c.episodes.length!==c.total){
+    const old = c.episodes||[];
+    c.episodes = Array.from({length:c.total}, (_,i)=>!!old[i]);
   }
-
-  grid.innerHTML = `<div class="grid grid-2">${filtered.map(x=>`
-    <div class="card" style="border-inline-start:4px solid var(--accent);">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-        <span class="pill" style="background:var(--accent-soft); color:var(--accent); font-size:11px;">${esc(x.type || 'علم شرعي')}</span>
-        <button class="btn btn-icon btn-ghost" style="width:28px; height:28px; color:var(--danger);" onclick="deleteLesson('${x.id}')">✕</button>
-      </div>
-      <h3 style="margin:8px 0 4px 0; font-size:16px; font-weight:800;" class="font-amiri">${esc(x.title)}</h3>
-      <div class="muted" style="font-size:13.5px; margin-bottom:8px;">الشيخ/المحاضر: ${esc(x.sheikh || 'غير محدد')}</div>
-      ${x.notes?`<div style="font-size:13px; background:var(--bg-soft); padding:8px 12px; border-radius:var(--radius-s); margin-top:8px; line-height:1.5; white-space:pre-wrap;" class="muted">${esc(x.notes)}</div>`:''}
-    </div>
-  `).join('')}</div>`;
+  return c.episodes;
 }
-
+function renderLessons(){
+  const el = $('#page-lessons'); if(!el) return;
+  el.innerHTML = `
+    ${DB.lessons.length===0 ? emptyState('🕌','لا توجد سلاسل دروس بعد','أضف سلسلة دروس إسلامية جديدة') : `
+      <div class="grid grid-2">
+        ${DB.lessons.map(c=>{
+          const episodes = ensureEpisodes(c);
+          const completed = episodes.filter(Boolean).length;
+          const pct = c.total>0 ? clamp(Math.round((completed/c.total)*100),0,100):0;
+          return `
+          <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <div style="font-weight:800; font-size:16px;">${esc(c.title)}</div>
+                <div class="muted" style="font-size:12.5px;">الشيخ: ${esc(c.scholar||'—')}</div>
+              </div>
+              <button class="btn btn-icon btn-danger-ghost" onclick="deleteLesson('${c.id}')">🗑</button>
+            </div>
+            <div class="pill" style="margin:8px 0;">${c.status}</div>
+            <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px;"><span>${completed}/${c.total} حلقة</span><span>${pct}%</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+            <div style="display:flex; gap:8px; margin-top:12px;">
+              ${c.link ? `<a href="${esc(c.link)}" target="_blank" rel="noopener" class="btn btn-icon" title="فتح رابط السلسلة">🔗</a>` : ''}
+              <button class="btn btn-primary" style="flex:1;" onclick="openLessonEpisodesModal('${c.id}')">عرض الحلقات ✓</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    `}
+  `;
+}
 function openLessonModal(){
   openModal(`
-    <div class="modal-head"><h3>تسجيل درس إسلامي / تلخيص علمي</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field"><label>عنوان الدرس</label><input id="lTitle"></div>
-    <div class="field"><label>الشيخ / المحاضر</label><input id="lSheikh"></div>
-    <div class="field">
-      <label>علم المادة</label>
-      <select id="lType">
-        <option value="عقيدة">💎 عقيدة</option>
-        <option value="حديث">📜 حديث</option>
-        <option value="فقه">⚖️ فقه وسيرة</option>
-        <option value="تزكية">🌱 تزكية ورقائق</option>
-      </select>
-    </div>
-    <div class="field"><label>فوائد وتلخيص الدرس</label><textarea id="lNotes" style="height:100px;" placeholder="اكتب الفوائد والروابط هنا..."></textarea></div>
-    <button class="btn btn-primary" style="width:100%;" onclick="saveLesson()">تسجيل المادة</button>
+    <div class="modal-head"><h3>إضافة سلسلة دروس</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
+    <div class="field"><label>عنوان السلسلة</label><input id="lTitle" placeholder="اسم السلسلة"></div>
+    <div class="field"><label>اسم الشيخ</label><input id="lScholar" placeholder="اسم الشيخ"></div>
+    <div class="field"><label>إجمالي الحلقات</label><input id="lTotal" type="number" min="1" placeholder="30"></div>
+    <div class="field"><label>رابط السلسلة (اختياري)</label><input id="lLink" type="url" placeholder="https://..."></div>
+    <button class="btn btn-primary" style="width:100%;" onclick="saveLesson()">إضافة السلسلة</button>
   `);
 }
 function saveLesson(){
-  const title = $('#lTitle').value.trim();
-  if(!title) return;
-  DB.lessons.unshift({
-    id: uid(), title, sheikh: $('#lSheikh').value.trim(),
-    type: $('#lType').value, notes: $('#lNotes').value.trim()
-  });
-  persist.lessons(); closeModal(); renderLessons(); showToast('تم حفظ الدرس والتلخيص الشرعي','🕌');
-  checkAchievements();
+  const title = $('#lTitle').value.trim(); if(!title) return;
+  const total = Number($('#lTotal').value)||1;
+  DB.lessons.push({id:uid(), title, scholar:$('#lScholar').value.trim(), total, episodes:Array.from({length:total},()=>false), status:'أسمعها حالياً', link:$('#lLink').value.trim()});
+  persist.lessons(); closeModal(); renderLessons();
 }
-function deleteLesson(id){
-  if(!confirm('هل تريد حذف هذا الدرس؟')) return;
-  DB.lessons = DB.lessons.filter(x=>x.id!==id);
-  persist.lessons(); renderLessons();
+function openLessonEpisodesModal(id){
+  const c = DB.lessons.find(x=>x.id===id); if(!c) return;
+  const episodes = ensureEpisodes(c);
+  openModal(`
+    <div class="modal-head"><h3>${esc(c.title)}</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
+    <div class="field">
+      <label>رابط السلسلة</label>
+      <div style="display:flex; gap:8px;">
+        <input id="lessonLinkInput" type="url" value="${esc(c.link||'')}" placeholder="https://...">
+        <button class="btn" onclick="saveLessonLink('${c.id}')">حفظ</button>
+      </div>
+    </div>
+    <div class="muted" style="font-size:12.5px; margin-bottom:10px;">اضغط على رقم الحلقة بعد ما تسمعها</div>
+    <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:8px;">
+      ${episodes.map((done,i)=>`
+        <button onclick="toggleLessonEpisode('${c.id}',${i})"
+          style="aspect-ratio:1; border-radius:10px; border:1px solid ${done?'var(--success)':'var(--border)'}; background:${done?'var(--success)':'var(--bg-soft)'}; color:${done?'#fff':'var(--text)'}; font-weight:700; font-size:13px;">
+          ${i+1}
+        </button>
+      `).join('')}
+    </div>
+  `);
+}
+function toggleLessonEpisode(id,i){
+  const c = DB.lessons.find(x=>x.id===id); if(!c) return;
+  const episodes = ensureEpisodes(c);
+  episodes[i] = !episodes[i];
+  const completed = episodes.filter(Boolean).length;
+  if(completed>=c.total) c.status='مكتملة'; else if(c.status==='مكتملة') c.status='أسمعها حالياً';
+  persist.lessons(); checkAchievements();
+  if(episodes[i]) randomMotivation();
+  openLessonEpisodesModal(id);
+  renderLessons();
+}
+function deleteLesson(id){ DB.lessons = DB.lessons.filter(c=>c.id!==id); persist.lessons(); renderLessons(); }
+function saveLessonLink(id){
+  const c = DB.lessons.find(x=>x.id===id); if(!c) return;
+  c.link = $('#lessonLinkInput').value.trim();
+  persist.lessons(); showToast('تم حفظ الرابط','🔗'); renderLessons();
 }
 
-/* ====================== GOALS PAGE ====================== */
+/* ====================== GOALS 2026 PAGE ====================== */
 function renderGoals(){
-  const g = $('#page-goals');
-  if(!DB.goals2026.length){
-    g.innerHTML = `<div class="empty-state"><div class="ic">🎯</div><p>لم تضع أي أهداف لعام 2026 حتى الآن.</p></div>`;
-    return;
-  }
-  g.innerHTML = `<div style="max-width:650px; margin:0 auto; display:flex; flex-direction:column; gap:10px;">${DB.goals2026.map(x=>`
-    <div class="card habit-row ${x.done?'done':''}" style="margin-bottom:0;" onclick="toggleGoalDone('${x.id}')">
-      <div class="chk">${x.done?'✓':''}</div>
-      <div style="flex:1;">
-        <div class="label" style="font-size:15px; font-weight:700;">${esc(x.title)}</div>
-        ${x.desc?`<div class="muted" style="font-size:12.5px; margin-top:2px;">${esc(x.desc)}</div>`:''}
+  const el = $('#page-goals'); if(!el) return;
+  const done = DB.goals2026.filter(g=>g.done).length;
+  const pct = DB.goals2026.length ? Math.round((done/DB.goals2026.length)*100) : 0;
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div class="section-title" style="margin:0;">أهداف 2026</div>
+        <span class="pill">${pct}% مكتمل</span>
       </div>
-      <button class="btn btn-icon btn-ghost" style="width:32px; height:32px; color:var(--danger);" onclick="event.stopPropagation(); deleteGoal('${x.id}')">✕</button>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
     </div>
-  `).join('')}</div>`;
+    ${DB.goals2026.length===0 ? emptyState('🎯','لا توجد أهداف بعد','حدد أهدافك السنوية الكبرى') :
+      DB.goals2026.map(g=>`
+        <div class="habit-row ${g.done?'done':''}" onclick="toggleGoal('${g.id}')">
+          <div class="chk">${g.done?'✓':''}</div>
+          <div class="label">${esc(g.text)}</div>
+          <button class="btn btn-icon btn-danger-ghost" onclick="event.stopPropagation(); deleteGoal('${g.id}')">🗑</button>
+        </div>
+      `).join('')}
+  `;
 }
 function openGoalItemModal(){
   openModal(`
-    <div class="modal-head"><h3>إضافة هدف لعام 2026</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field"><label>ما هو هدفك الكبير؟</label><input id="gTitle" placeholder="مثال: ختم القرآن الكريم حفظاً"></div>
-    <div class="field"><label>خطة مصغرة أو تفاصيل</label><textarea id="gDesc" placeholder="كيف ستحقق هذا الهدف؟"></textarea></div>
-    <button class="btn btn-primary" style="width:100%;" onclick="saveGoal()">إضافة الهدف</button>
+    <div class="modal-head"><h3>هدف جديد لعام 2026</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
+    <div class="field"><label>الهدف</label><input id="gText" placeholder="مثال: حفظ سورة البقرة"></div>
+    <button class="btn btn-primary" style="width:100%;" onclick="saveGoalItem()">إضافة الهدف</button>
   `);
 }
-function saveGoal(){
-  const title = $('#gTitle').value.trim();
-  if(!title) return;
-  DB.goals2026.push({ id: uid(), title, desc: $('#gDesc').value.trim(), done: false });
-  persist.goals2026(); closeModal(); renderGoals(); showToast('تمت إضافة هدفك لعام 2026','🎯');
+function saveGoalItem(){
+  const text = $('#gText').value.trim(); if(!text) return;
+  DB.goals2026.push({id:uid(), text, done:false});
+  persist.goals2026(); closeModal(); renderGoals();
 }
-function toggleGoalDone(id){
-  const x = DB.goals2026.find(g=>g.id===id); if(!x) return;
-  x.done = !x.done;
-  persist.goals2026(); renderGoals();
-  if(x.done) { showToast('كفو! خطوة عملاقة نحو الأمام','🏆'); checkAchievements(); }
+function toggleGoal(id){
+  const g = DB.goals2026.find(x=>x.id===id); if(!g) return;
+  g.done = !g.done; persist.goals2026();
+  if(g.done) randomMotivation();
+  renderGoals();
 }
-function deleteGoal(id){
-  if(!confirm('هل تريد حذف هذا الهدف؟')) return;
-  DB.goals2026 = DB.goals2026.filter(g=>g.id!==id);
-  persist.goals2026(); renderGoals();
-}
+function deleteGoal(id){ DB.goals2026 = DB.goals2026.filter(g=>g.id!==id); persist.goals2026(); renderGoals(); }
 
-/* ====================== ACHIEVEMENTS ====================== */
+/* ====================== ACHIEVEMENTS PAGE ====================== */
 const BADGES = [
-  {id:'first_step', title:'البداية المباركة', desc:'أتممت فرائض يوم واحد كاملة', ic:'🌱'},
-  {id:'streak_3', title:'المثابر', desc:'حافظت على الالتزام الكامل 3 أيام متتالية', ic:'🔥'},
-  {id:'streak_7', title:'المستمسك بالعروة', desc:'حافظت على الالتزام الكامل 7 أيام متتالية', ic:'👑'},
-  {id:'quran_start', title:'أهل القرآن', desc:'بدأت تسجيل ورد حفظ القرآن الكريم', ic:'📖'},
-  {id:'book_one', title:'قارئ نهم', desc:'قمت بتحديث كتاب واحد في مكتبتك', ic:'📚'},
-  {id:'lesson_one', title:'طالب العلم', desc:'قيدت أول درس إسلامي مفيد لك', ic:'🕌'},
+  {id:'streak7', icon:'🏆', label:'أول 7 أيام صلاة متتالية', test: ()=> computeLongestStreak()>=7},
+  {id:'adhkar30', icon:'🏆', label:'أول 30 يوم أذكار', test: ()=> Object.values(DB.prayerHistory).filter(d=>d.adhkarS && d.adhkarM).length>=30},
+  {id:'juz1', icon:'🏆', label:'أول جزء قرآن', test: ()=> quranStats().memorizedAyat >= Math.round(QURAN_TOTAL_AYAT/30)},
+  {id:'book1', icon:'🏆', label:'أول كتاب مكتمل', test: ()=> DB.books.some(b=>b.status==='انتهيت منه')},
+  {id:'course1', icon:'🏆', label:'أول كورس مكتمل', test: ()=> DB.courses.some(c=>c.status==='مكتمل')},
+  {id:'journal100', icon:'🏆', label:'أول 100 تدوينة', test: ()=> DB.journal.length>=100},
 ];
 function checkAchievements(){
-  const totalDays = totalCompletedDays();
-  const streak = computeStreak();
-  const hasQuran = !!DB.quranProgress.surah;
-  const hasBooks = DB.books.some(b=>b.progress > 0);
-  const hasLessons = DB.lessons.length > 0;
-
-  const unlocked = [];
-  if(totalDays >= 1) unlocked.push('first_step');
-  if(streak >= 3) unlocked.push('streak_3');
-  if(streak >= 7) unlocked.push('streak_7');
-  if(hasQuran) unlocked.push('quran_start');
-  if(hasBooks) unlocked.push('book_one');
-  if(hasLessons) unlocked.push('lesson_one');
-
-  unlocked.forEach(id=>{
-    if(!DB.achievementsSeen.includes(id)){
-      DB.achievementsSeen.push(id);
+  BADGES.forEach(b=>{
+    if(!DB.achievementsSeen.includes(b.id) && b.test()){
+      DB.achievementsSeen.push(b.id);
       persist.achievementsSeen();
-      const b = BADGES.find(x=>x.id===id);
-      if(b) setTimeout(()=>showToast(`إنجاز جديد: ${b.title} — ${b.desc}`, b.ic), 1200);
+      setTimeout(()=>showToast(`إنجاز جديد: ${b.label}`,'🏆'), 600);
     }
   });
 }
 function renderAchievements(){
-  const a = $('#page-achievements');
-  checkAchievements();
-  a.innerHTML = `
-    <div style="text-align:center; margin-bottom:24px;">
-      <h2 style="margin:0 0 4px 0; font-weight:800;">🏆 لوحة الأوسمة والإنجازات</h2>
-      <p class="muted" style="font-size:14px;">أوسمتك تزيد وتضيء كلما زاد التزامك اليومي بفرائضك وقراءتك وطلبك للعلم.</p>
+  const el = $('#page-achievements'); if(!el) return;
+  el.innerHTML = `
+    <div class="section-title">شارات الإنجاز</div>
+    <div class="grid grid-3">
+      ${BADGES.map(b=>{
+        const unlocked = DB.achievementsSeen.includes(b.id) || b.test();
+        return `<div class="badge-tile ${unlocked?'':'locked'}"><div class="ic">${b.icon}</div><div style="font-size:13px; font-weight:700;">${b.label}</div></div>`;
+      }).join('')}
     </div>
-    <div class="grid grid-3">${BADGES.map(b=>{
-      const isLocked = !DB.achievementsSeen.includes(b.id);
-      return `
-        <div class="badge-tile ${isLocked?'locked':''}">
-          <div class="ic">${b.ic}</div>
-          <div style="font-weight:800; font-size:15px; margin-top:4px;">${esc(b.title)}</div>
-          <div class="muted" style="font-size:12px; margin-top:2px; line-height:1.4;">${esc(b.desc)}</div>
-        </div>
-      `;
-    }).join('')}</div>
   `;
 }
 
-/* ====================== FOCUS CENTER ====================== */
-let pomoTimeLeft = 25 * 60;
-let pomoMode = 'work'; // 'work' or 'short'
-let pomoTimerId = null;
+/* ====================== FOCUS CENTER (ADHD) ====================== */
+let pomodoro = { seconds: 25*60, total: 25*60, running:false, mode:'work', interval:null };
+function getFocusTasks(){ if(!DB.focusTasks[todayKey()]) DB.focusTasks[todayKey()]=[]; return DB.focusTasks[todayKey()]; }
 function renderFocus(){
-  const f = $('#page-focus');
-  const tk = todayKey();
-  const list = DB.focusTasks[tk] || [];
+  const el = $('#page-focus'); if(!el) return;
+  const tasks = getFocusTasks();
+  const doneCount = tasks.filter(t=>t.done).length;
+  const pct = tasks.length ? Math.round((doneCount/tasks.length)*100) : 0;
+  const circumference = 2*Math.PI*52;
+  const pomoPct = 1 - (pomodoro.seconds/pomodoro.total);
+  const pomoOffset = circumference - pomoPct*circumference;
+  const mm = String(Math.floor(pomodoro.seconds/60)).padStart(2,'0');
+  const ss = String(pomodoro.seconds%60).padStart(2,'0');
 
-  f.innerHTML = `
-    <div class="grid grid-2">
-      <div class="card" style="text-align:center; display:flex; flex-direction:column; justify-content:center;">
-        <h3 class="section-title" style="margin-bottom:16px;">⏱️ مؤقت الطماطم (Pomodoro)</h3>
-        <div style="font-size:54px; font-weight:900; font-variant-numeric: tabular-nums; margin:10px 0; letter-spacing:1px;" id="pomoDisplay">
-          ${formatPomoTime(pomoTimeLeft)}
-        </div>
-        <div style="margin-bottom:16px; display:flex; gap:6px; justify-content:center;">
-          <span class="pill" id="pomoModeWork" style="background:${pomoMode==='work'?'var(--primary-dim)':'var(--bg-soft)'}; color:${pomoMode==='work'?'var(--primary)':'var(--text-muted)'}; font-weight:700;">تركيز</span>
-          <span class="pill" id="pomoModeShort" style="background:${pomoMode==='short'?'var(--primary-dim)':'var(--bg-soft)'}; color:${pomoMode==='short'?'var(--primary)':'var(--text-muted)'}; font-weight:700;">راحة قصيرة</span>
-        </div>
-        <div style="display:flex; gap:8px; justify-content:center;">
-          <button class="btn btn-primary" id="pomoStartBtn" onclick="togglePomoTimer()">${pomoTimerId?'إيقاف مؤقت':'▶️ ابدأ التركيز'}</button>
-          <button class="btn" onclick="resetPomoTimer()">🔄 إعادة ضبط</button>
-        </div>
+  el.innerHTML = `
+    <div class="grid grid-2" style="align-items:start;">
+      <div class="card">
+        <div class="section-title">أهم 3 مهام اليوم</div>
+        ${tasks.length===0 ? emptyState('🎯','لا توجد مهام بعد','أضف حتى 3 مهام أساسية لليوم') : tasks.map(t=>`
+          <div class="focus-task ${t.done?'done':''}" style="${t.done?'opacity:.55;':''}">
+            <div class="chk" style="${t.done?'background:var(--success);border-color:var(--success);color:#fff;':''}" onclick="toggleFocusTask('${t.id}')">${t.done?'✓':''}</div>
+            <div style="flex:1; ${t.done?'text-decoration:line-through;':''}">${esc(t.text)}</div>
+            <button class="btn btn-icon btn-danger-ghost" onclick="deleteFocusTask('${t.id}')">🗑</button>
+          </div>
+        `).join('')}
+        <div class="muted" style="font-size:13px; margin-top:10px;">إنتاجية اليوم: ${pct}%</div>
+        <div class="bar-track" style="margin-top:6px;"><div class="bar-fill" style="width:${pct}%"></div></div>
       </div>
 
-      <div class="card">
-        <h3 class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
-          <span>🧠 مهام التركيز لليوم</span>
-          <button class="btn" style="padding:4px 10px; font-size:12px;" onclick="openFocusTaskModal()">+ إضافة مهمة</button>
-        </h3>
-        <div id="focusTasksContainer">
-          ${!list.length?`<div class="muted" style="font-size:13.5px; padding:20px 0; text-align:center;">لم تضف مهام تركيز لليوم بعد.</div>`:list.map(x=>`
-            <div class="focus-task" style="background:var(--bg-elevated-2);">
-              <input type="checkbox" ${x.done?'checked':''} style="width:20px; height:20px; cursor:pointer;" onchange="toggleFocusTaskDone('${x.id}')">
-              <span style="flex:1; font-weight:600; font-size:14.5px; text-decoration:${x.done?'line-through':'none'}; opacity:${x.done?.5:1}">${esc(x.title)}</span>
-              <div style="display:flex; align-items:center; gap:4px;">
-                <button class="btn btn-ghost" style="padding:2px 6px; font-size:12px;" onclick="incrementPomoCount('${x.id}')">🍅 +1</button>
-                <span class="pill" style="font-size:11px; font-weight:700;">${x.pomoCount || 0}</span>
-                <button class="btn btn-icon btn-ghost" style="width:26px; height:26px; color:var(--danger); font-size:11px;" onclick="deleteFocusTask('${x.id}')">✕</button>
+      <div class="card" style="text-align:center;">
+        <div class="section-title">مؤقت بومودورو</div>
+        <div class="ring-wrap pomo-ring">
+          <svg viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="52"/>
+            <circle class="ring-fg" cx="60" cy="60" r="52" stroke-dasharray="${circumference}" stroke-dashoffset="${pomoOffset}"/>
+          </svg>
+          <div class="ring-center"><div class="ring-pct" style="font-size:26px;">${mm}:${ss}</div><div class="ring-label">${pomodoro.mode==='work'?'تركيز':'استراحة'}</div></div>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:16px; justify-content:center;">
+          <button class="btn btn-primary" onclick="pomoToggle()">${pomodoro.running?'⏸ إيقاف':'▶ ابدأ'}</button>
+          <button class="btn" onclick="pomoReset()">⟲ إعادة</button>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:10px; justify-content:center;">
+          <button class="tab-btn ${pomodoro.mode==='work'?'active':''}" onclick="pomoSetMode('work')">تركيز 25</button>
+          <button class="tab-btn ${pomodoro.mode==='break'?'active':''}" onclick="pomoSetMode('break')">استراحة 5</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+function openFocusTaskModal(){
+  const tasks = getFocusTasks();
+  if(tasks.length>=3){ showToast('أقصى 3 مهام أساسية لليوم — ركّز عليها أولاً','⚠️'); return; }
+  openModal(`
+    <div class="modal-head"><h3>مهمة تركيز جديدة</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
+    <div class="field"><label>المهمة</label><input id="fText" placeholder="ما أهم شيء يجب إنجازه؟"></div>
+    <button class="btn btn-primary" style="width:100%;" onclick="saveFocusTask()">إضافة</button>
+  `);
+}
+function saveFocusTask(){
+  const text = $('#fText').value.trim(); if(!text) return;
+  getFocusTasks().push({id:uid(), text, done:false});
+  persist.focusTasks(); closeModal(); renderFocus();
+}
+function toggleFocusTask(id){
+  const t = getFocusTasks().find(x=>x.id===id); if(!t) return;
+  t.done = !t.done; persist.focusTasks();
+  if(t.done) randomMotivation();
+  renderFocus();
+}
+function deleteFocusTask(id){
+  DB.focusTasks[todayKey()] = getFocusTasks().filter(t=>t.id!==id);
+  persist.focusTasks(); renderFocus();
+}
+function pomoToggle(){
+  pomodoro.running = !pomodoro.running;
+  if(pomodoro.running){
+    pomodoro.interval = setInterval(()=>{
+      pomodoro.seconds--;
+      if(pomodoro.seconds<=0){
+        clearInterval(pomodoro.interval); pomodoro.running=false;
+        showToast(pomodoro.mode==='work' ? 'أحسنت! وقت الاستراحة 🌿' : 'انتهت الاستراحة، هيا نركّز 💪','⏰');
+        pomoSetMode(pomodoro.mode==='work' ? 'break':'work');
+        return;
+      }
+      if(CURRENT_PAGE==='focus') renderFocus();
+    },1000);
+  } else { clearInterval(pomodoro.interval); }
+  renderFocus();
+}
+function pomoReset(){ clearInterval(pomodoro.interval); pomodoro.running=false; pomodoro.seconds=pomodoro.total; renderFocus(); }
+function pomoSetMode(mode){
+  clearInterval(pomodoro.interval); pomodoro.running=false; pomodoro.mode=mode;
+  pomodoro.total = mode==='work' ? 25*60 : 5*60; pomodoro.seconds = pomodoro.total;
+  renderFocus();
+}
+
+/* ====================== WALLET PAGE ====================== */
+const WALLETS = [['instapay','انستا باي','📲'],['cash','الفلوس الفعلية','💵']];
+let walletTxFilter = 'الكل';
+function fmtMoney(n){ return Number(n||0).toLocaleString('ar-EG', {maximumFractionDigits:2}); }
+function monthKey(d=new Date()){ return d.toISOString().slice(0,7); }
+
+function renderWallet(){
+  const el = $('#page-wallet'); if(!el) return;
+  const total = (DB.wallet.instapay||0) + (DB.wallet.cash||0);
+  const thisMonth = monthKey();
+  const monthTx = DB.transactions.filter(t=>t.date.slice(0,7)===thisMonth);
+  const monthExpense = monthTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+  const monthIncome = monthTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+
+  const filteredTx = (walletTxFilter==='الكل' ? DB.transactions : DB.transactions.filter(t=>t.wallet===walletTxFilter))
+    .slice().sort((a,b)=> b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+
+  el.innerHTML = `
+    <div class="hero-greeting" style="padding:24px;">
+      <div class="hero-text">
+        <div class="muted" style="font-size:13px; margin-bottom:6px;">إجمالي رصيدك</div>
+        <div class="font-amiri" style="font-size:34px; font-weight:700; margin-bottom:14px;">${fmtMoney(total)} ج.م</div>
+        <div class="grid grid-2">
+          ${WALLETS.map(([key,label,icon])=>`
+            <div class="card" style="background:var(--bg-elevated-2);">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:13px; font-weight:700;">${icon} ${label}</span>
+                <button class="btn btn-icon btn-ghost" style="width:28px; height:28px;" onclick="openEditBalanceModal('${key}')">✏️</button>
               </div>
+              <div style="font-size:21px; font-weight:900; margin-top:6px;">${fmtMoney(DB.wallet[key]||0)} ج.م</div>
             </div>
           `).join('')}
         </div>
       </div>
     </div>
-  `;
-}
-function formatPomoTime(sec){
-  const m = Math.floor(sec/60).toString().padStart(2,'0');
-  const s = (sec%60).toString().padStart(2,'0');
-  return `${m}:${s}`;
-}
-function togglePomoTimer(){
-  if(pomoTimerId){
-    clearInterval(pomoTimerId); pomoTimerId = null;
-  }else{
-    pomoTimerId = setInterval(()=>{
-      pomoTimeLeft--;
-      if(pomoTimeLeft <= 0){
-        clearInterval(pomoTimerId); pomoTimerId = null;
-        try { new Audio('https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg').play(); } catch(e){}
-        if(pomoMode === 'work'){
-          showToast('انتهت جلسة التركيز! خذ قسطاً من الراحة الآن','🍅');
-          pomoMode = 'short'; pomoTimeLeft = 5 * 60;
-        }else{
-          showToast('انتهت الاستراحة، حان وقت العمل والتركيز!','🧠');
-          pomoMode = 'work'; pomoTimeLeft = 25 * 60;
-        }
-      }
-      const disp = $('#pomoDisplay'); if(disp) disp.textContent = formatPomoTime(pomoTimeLeft);
-    }, 1000);
-  }
-  renderFocus();
-}
-function resetPomoTimer(){
-  if(pomoTimerId) { clearInterval(pomoTimerId); pomoTimerId = null; }
-  pomoMode = 'work'; pomoTimeLeft = 25 * 60;
-  renderFocus();
-}
-function openFocusTaskModal(){
-  openModal(`
-    <div class="modal-head"><h3>إضافة مهمة تركيز</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field"><label>ما هي المهمة التي تريد التركيز عليها الآن؟</label><input id="ftTitle" placeholder="مثال: مراجعة محاضرة علم النفس"></div>
-    <button class="btn btn-primary" style="width:100%;" onclick="saveFocusTask()">إضافة</button>
-  `);
-}
-function saveFocusTask(){
-  const title = $('#ftTitle').value.trim(); if(!title) return;
-  const tk = todayKey(); if(!DB.focusTasks[tk]) DB.focusTasks[tk]=[];
-  DB.focusTasks[tk].push({ id:uid(), title, done:false, pomoCount:0 });
-  persist.focusTasks(); closeModal(); renderFocus(); showToast('تمت إضافة مهمة التركيز بنجاح','🧠');
-}
-function toggleFocusTaskDone(id){
-  const tk = todayKey(); const list = DB.focusTasks[tk] || [];
-  const x = list.find(t=>t.id===id); if(!x) return;
-  x.done = !x.done; persist.focusTasks(); renderFocus();
-}
-function incrementPomoCount(id){
-  const tk = todayKey(); const list = DB.focusTasks[tk] || [];
-  const x = list.find(t=>t.id===id); if(!x) return;
-  x.pomoCount = (x.pomoCount || 0) + 1; persist.focusTasks(); renderFocus(); showToast('كفو! تم تسجيل جلسة تركيز طماطم ناجحة','🍅');
-}
-function deleteFocusTask(id){
-  const tk = todayKey(); if(!DB.focusTasks[tk]) return;
-  DB.focusTasks[tk] = DB.focusTasks[tk].filter(t=>t.id!==id);
-  persist.focusTasks(); renderFocus();
-}
 
-/* ====================== WALLET CENTER ====================== */
-const WALLETS = [['instapay','InstaPay 📲'], ['cash','كاش / محفظة 💵']];
-function renderWallet(){
-  const w = $('#page-wallet');
-  const total = Object.values(DB.wallet).reduce((a,b)=>a+b,0);
-
-  w.innerHTML = `
-    <div class="grid grid-3" style="margin-bottom:24px;">
-      <div class="card" style="text-align:center;">
-        <div class="muted" style="font-size:13px; font-weight:700;">إجمالي المحفظة المالي</div>
-        <div style="font-size:28px; font-weight:900; color:var(--primary); margin:6px 0;">${total.toFixed(2)} <span style="font-size:15px;">ج.م</span></div>
-      </div>
-      ${WALLETS.map(([key,lbl])=>`
-        <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-weight:700; font-size:14px;" class="muted">${lbl}</span>
-            <button class="btn btn-ghost" style="padding:2px 6px; font-size:11px;" onclick="openEditBalanceModal('${key}')">✏️ تعديل</button>
-          </div>
-          <div style="font-size:20px; font-weight:800; margin-top:8px;">${(DB.wallet[key]||0).toFixed(2)} <span style="font-size:12px;">ج.م</span></div>
-        </div>
-      `).join('')}
+    <div class="grid grid-2" style="margin-bottom:16px;">
+      <div class="card"><div style="font-weight:900; font-size:19px; color:var(--success);">+${fmtMoney(monthIncome)}</div><div class="muted" style="font-size:12.5px;">دخل هذا الشهر</div></div>
+      <div class="card"><div style="font-weight:900; font-size:19px; color:var(--danger);">−${fmtMoney(monthExpense)}</div><div class="muted" style="font-size:12.5px;">مصروفات هذا الشهر</div></div>
     </div>
 
-    <div class="card">
-      <h3 class="section-title">📊 آخر المعاملات المالية</h3>
-      ${!DB.transactions.length?`<div class="empty-state" style="padding:20px 0;"><p>لا توجد معاملات مسجلة بعد.</p></div>`:`
-        <div style="overflow-x:auto;">
-          <table style="width:100%; border-collapse:collapse; font-size:14px; text-align:start;">
-            <thead>
-              <tr style="border-bottom:1px solid var(--border); color:var(--text-muted); font-weight:700;">
-                <th style="padding:10px 6px;">التاريخ</th>
-                <th style="padding:10px 6px;">البيان</th>
-                <th style="padding:10px 6px;">المحفظة</th>
-                <th style="padding:10px 6px;">المبلغ</th>
-                <th style="padding:10px 6px; width:40px;"></th>
-              </tr>
-            </thead>
-            <tbody>
-              ${DB.transactions.map(t=>`
-                <tr style="border-bottom:1px solid var(--border-soft);">
-                  <td style="padding:12px 6px;" class="muted">${esc(t.date)}</td>
-                  <td style="padding:12px 6px; font-weight:600;">${esc(t.desc)}</td>
-                  <td style="padding:12px 6px;"><span class="pill">${WALLETS.find(x=>x[0]===t.wallet)?.[1]||t.wallet}</span></td>
-                  <td style="padding:12px 6px; font-weight:800; color:${t.type==='income'?'var(--success)':'var(--danger)'}">
-                    ${t.type==='income'?'+':'-'}${t.amount.toFixed(2)}
-                  </td>
-                  <td style="padding:12px 6px;">
-                    <button class="btn btn-icon btn-ghost" style="width:26px; height:26px; color:var(--danger);" onclick="deleteTransaction('${t.id}')">✕</button>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      `}
+    <div class="tab-row">
+      ${['الكل', ...WALLETS.map(w=>w[0])].map(f=>`<button class="tab-btn ${walletTxFilter===f?'active':''}" onclick="setWalletFilter('${f}')">${f==='الكل'?'الكل':WALLETS.find(w=>w[0]===f)[1]}</button>`).join('')}
     </div>
+
+    <div class="section-title">سجل الحركات</div>
+    ${filteredTx.length===0 ? emptyState('💰','مفيش حركات لسه','اضغط + لتسجيل أول عملية') : filteredTx.map(t=>{
+      const w = WALLETS.find(x=>x[0]===t.wallet);
+      const isExpense = t.type==='expense';
+      return `
+      <div class="card" style="margin-bottom:8px; display:flex; align-items:center; gap:12px;">
+        <div style="width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:18px; background:${isExpense?'var(--danger-soft)':'var(--success-soft)'};">${isExpense?'➖':'➕'}</div>
+        <div style="flex:1; min-width:0;">
+          <div style="font-weight:700; font-size:14.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(t.note || (isExpense?'مصروف':'دخل'))}</div>
+          <div class="muted" style="font-size:11.5px;">${w?w[1]:''} · ${esc(t.date)}</div>
+        </div>
+        <div style="font-weight:900; font-size:15px; color:${isExpense?'var(--danger)':'var(--success)'}; white-space:nowrap;">${isExpense?'−':'+'}${fmtMoney(t.amount)}</div>
+        <button class="btn btn-icon btn-danger-ghost" onclick="deleteTransaction('${t.id}')">🗑</button>
+      </div>`;
+    }).join('')}
   `;
 }
+function setWalletFilter(f){ walletTxFilter=f; renderWallet(); }
+
 function openTransactionModal(){
   openModal(`
-    <div class="modal-head"><h3>تسجيل معاملة مالية جديدة</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
+    <div class="modal-head"><h3>تسجيل عملية جديدة</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
     <div class="field">
-      <label>نوع المعاملة</label>
+      <label>النوع</label>
       <div class="seg-toggle">
         <input type="radio" name="txType" id="txTypeExpense" value="expense" checked>
-        <label for="txTypeExpense">💸 مصروفات</label>
+        <label for="txTypeExpense">➖ مصروف</label>
         <input type="radio" name="txType" id="txTypeIncome" value="income">
-        <label for="txTypeIncome">💰 إيرادات / دخل</label>
+        <label for="txTypeIncome">➕ دخل</label>
       </div>
     </div>
     <div class="field">
-      <label>المحفظة المستخدمة</label>
+      <label>من/إلى</label>
       <select id="txWallet">${WALLETS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select>
     </div>
-    <div class="field"><label>المبلغ (ج.م)</label><input id="txAmount" type="number" step="0.01" placeholder="0.00"></div>
-    <div class="field"><label>البيان / الوصف</label><input id="txDesc" placeholder="مثال: شراء كورس أو غداء"></div>
-    <button class="btn btn-primary" style="width:100%; margin-top:8px;" onclick="saveTransaction()">تسجيل المعاملة</button>
+    <div class="field"><label>المبلغ (ج.م)</label><input id="txAmount" type="number" min="0.01" step="0.01" placeholder="0.00"></div>
+    <div class="field"><label>ملاحظة (اختياري)</label><input id="txNote" placeholder="مثال: مواصلات، أكل، شحن..."></div>
+    <button class="btn btn-primary" style="width:100%;" onclick="saveTransaction()">حفظ</button>
   `);
 }
 function saveTransaction(){
-  const amount = parseFloat($('#txAmount').value);
-  const desc = $('#txDesc').value.trim();
+  const amount = Number($('#txAmount').value);
+  if(!amount || amount<=0) return;
   const wallet = $('#txWallet').value;
-  const type = $('input[name="txType"]:checked').value;
-
-  if(isNaN(amount) || amount <= 0 || !desc) return;
-
-  const t = { id: uid(), date: todayKey(), type, wallet, amount, desc };
-  DB.transactions.unshift(t);
-
-  // تحديث الحساب المالي تلقائياً
-  DB.wallet[wallet] = (DB.wallet[wallet] || 0) + (type === 'income' ? amount : -amount);
-
-  persist.transactions();
-  persist.wallet();
-  closeModal();
+  const checkedRadio = document.querySelector('input[name="txType"]:checked');
+  const type = checkedRadio ? checkedRadio.value : 'expense';
+  const note = $('#txNote').value.trim();
+  DB.transactions.push({id:uid(), type, wallet, amount, note, date:todayKey()});
+  DB.wallet[wallet] = (DB.wallet[wallet]||0) + (type==='income' ? amount : -amount);
+  persist.transactions(); persist.wallet(); closeModal();
+  showToast(type==='income' ? 'تم إضافة المبلغ لرصيدك 💰' : 'تم تسجيل المصروف', type==='income'?'✅':'📝');
   renderWallet();
-  showToast('تم تسجيل المعاملة وتحديث المحفظة بنجاح','💰');
 }
 function deleteTransaction(id){
-  if(!confirm('هل تريد حذف هذه المعاملة؟')) return;
   const t = DB.transactions.find(x=>x.id===id); if(!t) return;
   DB.wallet[t.wallet] = (DB.wallet[t.wallet]||0) - (t.type==='income' ? t.amount : -t.amount);
   DB.transactions = DB.transactions.filter(x=>x.id!==id);
@@ -1531,45 +1567,27 @@ function saveEditBalance(key){
   persist.wallet(); closeModal(); renderWallet();
 }
 
-/* ====================== BOOT & SHORTCUTS ====================== */
+/* ====================== BOOT ====================== */
 async function boot(){
   await loadAll();
   applyTheme();
   renderShell();
   renderApp();
-  
-  // نظام ميزة الاختصارات الذكية Keyboard Shortcuts (Ctrl + S للحفظ الفوري)
-  window.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-      e.preventDefault();
-      
-      // حفظ البيانات الحالية المفتوحة في المودال أو العناصر المفعلة بشكل ذكي وفوري
-      const journalTextarea = $('#jContent');
-      const quranNotesTextarea = $('#qNotes');
-      
-      if (journalTextarea) {
-        saveJournal();
-      } else if (quranNotesTextarea) {
-        saveQuranProgress();
-      } else {
-        // إذا لم يكن هناك حقل نصي مفتوح، يطلق حفظاً عاماً لجميع بيانات الـ Cache
-        Promise.all(Object.values(persist).map(fn=>fn())).then(() => {
-          showToast('تمت مزامنة وحفظ كل البيانات محلياً وبنجاح!', '💾');
-        });
-      }
-    }
-  });
+  checkAchievements();
 }
-
-// تشغيل نظام حياتك عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', boot);
-
-// تسجيل الـ Service Worker للتشغيل أوفلاين
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('Service Worker Registered!', reg))
-      .catch(err => console.log('Service Worker Failed!', err));
+boot();
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("./sw.js")
+      .then(reg => {
+        console.log("Service Worker Registered", reg);
+      })
+      .catch(err => {
+        console.error("Service Worker Error:", err);
+      });
   });
 }
 </script>
