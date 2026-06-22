@@ -1563,6 +1563,15 @@ async function boot(){
 
 // تشغيل نظام حياتك عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', boot);
+
+// تسجيل الـ Service Worker للتشغيل أوفلاين
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('Service Worker Registered!', reg))
+      .catch(err => console.log('Service Worker Failed!', err));
+  });
+}
 </script>
 </body>
 </html>
