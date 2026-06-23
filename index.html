@@ -3,529 +3,305 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>MY LIFE — نظام تشغيل حياتك</title>
+<title>MY LIFE OS — نظام تشغيل حياتك</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#121212">
+<meta name="theme-color" content="#1F6F54">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 <style>
-/* ========== TOKENS ========== */
-
-@font-face {
-  font-family: 'kuffi';
-  font-style: normal;
-  font-weight: 400;
-  src: url(/assets/fonts/kuffi.ttf) format('truetype')  ;
-  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+1EE00-1EEFF;
-}
-
-:root{
-  --radius-s:10px; --radius-m:16px; --radius-l:24px; --radius-xl:32px;
-  --shadow-s:0 1px 3px rgba(20,30,25,.06), 0 1px 2px rgba(20,30,25,.08);
-  --shadow-m:0 8px 24px rgba(20,30,25,.08), 0 2px 6px rgba(20,30,25,.06);
-  --shadow-l:0 20px 50px rgba(20,30,25,.16);
-  --ease:cubic-bezier(.22,1,.36,1);
-}
-html[data-theme="light"]{
-  --bg:#FBF8F2; --bg-soft:#F3EEE2; --bg-elevated:#FFFFFF; --bg-elevated-2:#FFFEFB;
-  --text:#1C2622; --text-muted:#6E7A72; --text-faint:#A4ADA4;
-  --border:#E9E2D2; --border-soft:#F0EBDD;
-  --primary:#1F6F54; --primary-light:#2FA876; --primary-dim:#E5F1EB;
-  --accent:#B6862F; --accent-soft:#F4E9D2;
-  --success:#2FA876; --success-soft:#E1F4EB;
-  --danger:#C4543F; --danger-soft:#F8E5E0;
-  --gold-glow: radial-gradient(circle, rgba(201,162,75,.35), transparent 70%);
-}
-html[data-theme="dark"]{
-  --bg:#0A0F1F; --bg-soft:#101830; --bg-elevated:#141D3A; --bg-elevated-2:#182347;
-  --text:#E8ECF8; --text-muted:#9AA6C8; --text-faint:#5C6790;
-  --border:#26315A; --border-soft:#1B2547;
-  --primary:#36B888; --primary-light:#4ED7A3; --primary-dim:#142A2D;
-  --accent:#D8B662; --accent-soft:#241F38;
-  --success:#3FCB91; --success-soft:#102A2C;
-  --danger:#E58572; --danger-soft:#2B1830;
-  --gold-glow: radial-gradient(circle, rgba(216,182,98,.22), transparent 70%);
-}
-*{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
-body{
-  background:var(--bg); color:var(--text);
-  font-family:'Tajawal',sans-serif;
-  -webkit-font-smoothing:antialiased;
-  transition:background .35s var(--ease), color .35s var(--ease);
-  min-height:100vh; overflow-x:hidden;
-}
-.font-amiri{font-family:'Amiri',serif;}
-.name-font{
-    font-family:'kuffi','Amiri',serif !important;
-    font-weight:400 !important;
-    font-size: 42px !important;
-}
-::selection{background:var(--primary); color:#fff;}
-::-webkit-scrollbar{width:8px; height:8px;}
-::-webkit-scrollbar-thumb{background:var(--border); border-radius:8px;}
-::-webkit-scrollbar-track{background:transparent;}
-a{color:inherit; text-decoration:none;}
-button{font-family:inherit; cursor:pointer;}
-:focus-visible{outline:2px solid var(--primary); outline-offset:2px;}
-@media (prefers-reduced-motion: reduce){ *{animation-duration:.01ms !important; transition-duration:.01ms !important;} }
-
-/* ===== LAYOUT ===== */
-.app-shell{display:flex; min-height:100vh; position:relative;}
-.sidebar{
-  position:fixed; inset-inline-start:0; top:0; bottom:0; width:280px; z-index:60;
-  background:var(--bg-elevated); border-inline-end:1px solid var(--border);
-  transform:translateX(110%); transition:transform .4s var(--ease);
-  display:flex; flex-direction:column; padding:20px 16px;
-}
+:root{--radius-s:10px;--radius-m:16px;--radius-l:24px;--radius-xl:32px;--shadow-s:0 1px 3px rgba(20,30,25,.06),0 1px 2px rgba(20,30,25,.08);--shadow-m:0 8px 24px rgba(20,30,25,.10),0 2px 6px rgba(20,30,25,.07);--shadow-l:0 20px 50px rgba(20,30,25,.18);--ease:cubic-bezier(.22,1,.36,1);}
+html[data-theme="light"]{--bg:#FBF8F2;--bg-soft:#F3EEE2;--bg-elevated:#FFFFFF;--bg-elevated-2:#FFFEFB;--text:#1C2622;--text-muted:#6E7A72;--text-faint:#A4ADA4;--border:#E9E2D2;--border-soft:#F0EBDD;--primary:#1F6F54;--primary-light:#2FA876;--primary-dim:#E5F1EB;--accent:#B6862F;--accent-soft:#F4E9D2;--success:#2FA876;--success-soft:#E1F4EB;--danger:#C4543F;--danger-soft:#F8E5E0;--warning:#D4820A;--warning-soft:#FEF3DC;--gold-glow:radial-gradient(circle,rgba(201,162,75,.35),transparent 70%);}
+html[data-theme="dark"]{--bg:#121212;--bg-soft:#1A1A1A;--bg-elevated:#1E1E1E;--bg-elevated-2:#222222;--text:#EAEAEA;--text-muted:#A0A0A0;--text-faint:#5A5A5A;--border:#2A2A2A;--border-soft:#242424;--primary:#36B888;--primary-light:#4ED7A3;--primary-dim:#0D2420;--accent:#D8B662;--accent-soft:#221C0D;--success:#3FCB91;--success-soft:#0A1F1A;--danger:#E58572;--danger-soft:#231010;--warning:#F0B84A;--warning-soft:#1E1608;--gold-glow:radial-gradient(circle,rgba(216,182,98,.18),transparent 70%);}
+*{box-sizing:border-box;}html,body{margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;-webkit-font-smoothing:antialiased;transition:background .3s var(--ease),color .3s var(--ease);min-height:100vh;overflow-x:hidden;}
+.font-amiri{font-family:'Amiri',serif;}::selection{background:var(--primary);color:#fff;}
+::-webkit-scrollbar{width:6px;height:6px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}::-webkit-scrollbar-track{background:transparent;}
+a{color:inherit;text-decoration:none;}button{font-family:inherit;cursor:pointer;}:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
+.app-shell{display:flex;min-height:100vh;position:relative;}
+.sidebar{position:fixed;inset-inline-start:0;top:0;bottom:0;width:280px;z-index:60;background:var(--bg-elevated);border-inline-end:1px solid var(--border);transform:translateX(110%);transition:transform .4s var(--ease);display:flex;flex-direction:column;padding:20px 16px;}
 .sidebar.open{transform:translateX(0);}
-.sidebar-overlay{
-  position:fixed; inset:0; background:rgba(10,14,12,.45); backdrop-filter:blur(2px);
-  z-index:55; opacity:0; pointer-events:none; transition:opacity .35s var(--ease);
-}
-.sidebar-overlay.show{opacity:1; pointer-events:auto;}
-.nav-item{
-  display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:var(--radius-s);
-  color:var(--text-muted); font-weight:500; font-size:15px; transition:all .2s var(--ease); margin-bottom:2px;
-}
-.nav-item:hover{background:var(--bg-soft); color:var(--text);}
-.nav-item.active{background:var(--primary-dim); color:var(--primary);}
+.sidebar-overlay{position:fixed;inset:0;background:rgba(10,14,12,.45);backdrop-filter:blur(2px);z-index:55;opacity:0;pointer-events:none;transition:opacity .35s var(--ease);}
+.sidebar-overlay.show{opacity:1;pointer-events:auto;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--radius-s);color:var(--text-muted);font-weight:500;font-size:14.5px;transition:all .2s var(--ease);margin-bottom:2px;cursor:pointer;}
+.nav-item:hover{background:var(--bg-soft);color:var(--text);}
+.nav-item.active{background:var(--primary-dim);color:var(--primary);}
 html[data-theme="dark"] .nav-item.active{color:var(--primary-light);}
-.nav-item .ic{width:20px; text-align:center; font-size:17px;}
-
-.topbar{
-  position:sticky; top:0; z-index:40; display:flex; align-items:center; justify-content:space-between;
-  padding:14px 18px; background:color-mix(in srgb, var(--bg) 80%, transparent);
-  backdrop-filter:blur(10px); border-bottom:1px solid var(--border-soft);
-}
-.hamburger{
-  width:42px; height:42px; border-radius:12px; background:var(--bg-elevated); border:1px solid var(--border);
-  display:flex; align-items:center; justify-content:center; font-size:18px; transition:all .2s var(--ease);
-}
-.hamburger:hover{background:var(--bg-soft); transform:scale(1.04);}
-.logo-wrap{display:flex; align-items:center; gap:10px;}
-.logo-mark{
-  width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, var(--primary), var(--primary-light));
-  display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; font-size:15px;
-  box-shadow:var(--shadow-s);
-}
-.logo-text{font-weight:900; font-size:17px; letter-spacing:.5px;}
-
-.main{flex:1; max-width:1180px; margin:0 auto; width:100%; padding:0 18px 90px;}
-.page{display:none; animation:fadeUp .45s var(--ease);}
-.page.active{display:block;}
-@keyframes fadeUp{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
-
-.card{
-  background:var(--bg-elevated); border:1px solid var(--border-soft); border-radius:var(--radius-m);
-  box-shadow:var(--shadow-s); padding:18px; transition:transform .25s var(--ease), box-shadow .25s var(--ease);
-}
-.card:hover{box-shadow:var(--shadow-m);}
-.section-title{font-weight:800; font-size:18px; margin:0 0 12px;}
+.nav-item .ic{width:20px;text-align:center;font-size:16px;}
+.nav-section-label{font-size:10px;font-weight:800;letter-spacing:.8px;color:var(--text-faint);padding:10px 14px 3px;text-transform:uppercase;}
+.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--border-soft);}
+.hamburger{width:42px;height:42px;border-radius:12px;background:var(--bg-elevated);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .2s var(--ease);}
+.hamburger:hover{background:var(--bg-soft);}
+.logo-wrap{display:flex;align-items:center;gap:10px;}
+.logo-mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--primary-light));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:12px;box-shadow:var(--shadow-s);}
+.logo-text{font-weight:900;font-size:15px;letter-spacing:.3px;}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.icon-btn{width:40px;height:40px;border-radius:11px;background:var(--bg-elevated);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s var(--ease);}
+.icon-btn:hover{background:var(--bg-soft);}
+.main{flex:1;max-width:1200px;margin:0 auto;width:100%;padding:0 18px 90px;}
+.page{display:none;animation:fadeUp .4s var(--ease);}.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.card{background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:var(--radius-m);box-shadow:var(--shadow-s);padding:18px;transition:transform .25s var(--ease),box-shadow .25s var(--ease);}
+.card-hover:hover{box-shadow:var(--shadow-m);transform:translateY(-2px);}
+.section-title{font-weight:800;font-size:17px;margin:0 0 14px;}
 .muted{color:var(--text-muted);}
-.pill{
-  display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:99px; font-size:12.5px;
-  font-weight:700; background:var(--bg-soft); color:var(--text-muted);
-}
-.btn{
-  display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 18px; border-radius:var(--radius-s);
-  border:1px solid var(--border); background:var(--bg-elevated); color:var(--text); font-weight:700; font-size:14px;
-  transition:all .2s var(--ease);
-}
-.btn:hover{background:var(--bg-soft); transform:translateY(-1px);}
-.btn-primary{background:var(--primary); border-color:var(--primary); color:#fff;}
-.btn-primary:hover{background:var(--primary-light); border-color:var(--primary-light);}
-.btn-ghost{border-color:transparent; background:transparent;}
-.btn-ghost:hover{background:var(--bg-soft);}
-.btn-danger-ghost{border-color:transparent; background:transparent; color:var(--danger);}
-.btn-danger-ghost:hover{background:var(--danger-soft);}
-.btn-icon{width:38px; height:38px; padding:0; border-radius:11px;}
-input,textarea,select{
-  width:100%; padding:11px 13px; border-radius:var(--radius-s); border:1px solid var(--border);
-  background:var(--bg-soft); color:var(--text); font-family:inherit; font-size:14px; transition:all .2s var(--ease);
-}
-input:focus,textarea:focus,select:focus{border-color:var(--primary); background:var(--bg-elevated);}
-label{font-size:12.5px; font-weight:700; color:var(--text-muted); margin-bottom:5px; display:block;}
-.field{margin-bottom:12px;}
-
-/* checkbox-tile (habit rows) */
-.habit-row{
-  display:flex; align-items:center; gap:14px; padding:13px 14px; border-radius:var(--radius-s);
-  border:1px solid var(--border-soft); margin-bottom:8px; background:var(--bg-elevated-2);
-  transition:all .25s var(--ease); cursor:pointer; position:relative; overflow:hidden;
-}
-.habit-row:hover{border-color:var(--primary); transform:translateX(-2px);}
-html[dir="rtl"] .habit-row:hover{transform:translateX(2px);}
-.habit-row.done{background:var(--success-soft); border-color:var(--success);}
-.chk{
-  width:24px; height:24px; border-radius:8px; border:2px solid var(--border); flex-shrink:0;
-  display:flex; align-items:center; justify-content:center; transition:all .25s var(--ease); background:var(--bg-elevated);
-}
-.habit-row.done .chk{background:var(--success); border-color:var(--success); color:#fff; transform:scale(1.05);}
-.habit-row .label{font-weight:600; font-size:15px; flex:1;}
-.habit-row.done .label{color:var(--success); text-decoration:line-through; text-decoration-thickness:1.5px; opacity:.8;}
-@keyframes pop{0%{transform:scale(1);} 40%{transform:scale(1.18);} 100%{transform:scale(1);}}
-.pop{animation:pop .35s var(--ease);}
-
-/* progress ring */
-.ring-wrap{position:relative; width:170px; height:170px; margin:0 auto;}
-.ring-wrap svg{transform:rotate(-90deg); width:100%; height:100%;}
-.ring-bg{fill:none; stroke:var(--border-soft); stroke-width:11;}
-.ring-fg{fill:none; stroke:url(#ringGrad); stroke-width:11; stroke-linecap:round; transition:stroke-dashoffset .8s var(--ease);}
-.ring-center{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
-.ring-pct{font-size:30px; font-weight:900;}
-.ring-label{font-size:12px; color:var(--text-muted); font-weight:600;}
-
-/* bars */
-.bar-track{height:9px; border-radius:99px; background:var(--bg-soft); overflow:hidden;}
-.bar-fill{height:100%; border-radius:99px; background:linear-gradient(90deg, var(--primary), var(--primary-light)); transition:width .7s var(--ease);}
-
-/* grid */
-.grid{display:grid; gap:14px;}
-.grid-2{grid-template-columns:repeat(2,1fr);}
-.grid-3{grid-template-columns:repeat(3,1fr);}
-.grid-4{grid-template-columns:repeat(4,1fr);}
-@media(max-width:760px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr 1fr;}}
-@media(max-width:520px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
-
-/* toast / motivation */
-.toast{
-  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); z-index:200;
-  background:var(--bg-elevated); border:1px solid var(--primary); color:var(--primary); font-weight:700;
-  padding:13px 22px; border-radius:99px; box-shadow:var(--shadow-l); opacity:0; transition:all .4s var(--ease);
-  display:flex; align-items:center; gap:8px; max-width:90vw; text-align:center;
-}
-html[data-theme="dark"] .toast{color:var(--primary-light);}
-.toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
-
-/* celebration overlay */
-.celebrate-overlay{
-  position:fixed; inset:0; z-index:300; display:none; align-items:center; justify-content:center;
-  background:rgba(10,16,13,.7); backdrop-filter:blur(6px);
-}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:99px;font-size:12px;font-weight:700;background:var(--bg-soft);color:var(--text-muted);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:var(--radius-s);border:1px solid var(--border);background:var(--bg-elevated);color:var(--text);font-weight:700;font-size:14px;transition:all .2s var(--ease);}
+.btn:hover{background:var(--bg-soft);transform:translateY(-1px);}
+.btn-primary{background:var(--primary)!important;border-color:var(--primary)!important;color:#fff!important;}
+.btn-primary:hover{background:var(--primary-light)!important;border-color:var(--primary-light)!important;}
+.btn-ghost{border-color:transparent;background:transparent;}.btn-ghost:hover{background:var(--bg-soft);}
+.btn-danger{background:var(--danger)!important;border-color:var(--danger)!important;color:#fff!important;}
+.btn-icon{width:38px;height:38px;padding:0;border-radius:10px;}.btn-sm{padding:7px 13px;font-size:13px;}
+input,textarea,select{width:100%;padding:11px 13px;border-radius:var(--radius-s);border:1px solid var(--border);background:var(--bg-soft);color:var(--text);font-family:inherit;font-size:14px;transition:all .2s var(--ease);}
+input:focus,textarea:focus,select:focus{border-color:var(--primary);background:var(--bg-elevated);outline:none;}
+label{font-size:12.5px;font-weight:700;color:var(--text-muted);margin-bottom:5px;display:block;}
+.field{margin-bottom:14px;}
+.habit-row{display:flex;align-items:center;gap:14px;padding:13px 14px;border-radius:var(--radius-s);border:1px solid var(--border-soft);margin-bottom:8px;background:var(--bg-elevated-2);transition:all .25s var(--ease);cursor:pointer;position:relative;overflow:hidden;}
+.habit-row:hover{border-color:var(--primary);}
+.habit-row.done{background:var(--success-soft);border-color:var(--success);}
+.chk{width:24px;height:24px;border-radius:8px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .25s var(--ease);background:var(--bg-elevated);}
+.habit-row.done .chk{background:var(--success);border-color:var(--success);color:#fff;}
+.habit-row .hl{font-weight:600;font-size:15px;flex:1;}
+.habit-row.done .hl{color:var(--success);text-decoration:line-through;opacity:.75;}
+@keyframes pop{0%{transform:scale(1);}40%{transform:scale(1.15);}100%{transform:scale(1);}}.pop{animation:pop .3s var(--ease);}
+.ring-wrap{position:relative;width:155px;height:155px;margin:0 auto;}
+.ring-wrap svg{transform:rotate(-90deg);width:100%;height:100%;}
+.ring-bg{fill:none;stroke:var(--border-soft);stroke-width:10;}
+.ring-fg{fill:none;stroke:url(#ringGrad);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .8s var(--ease);}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring-pct{font-size:28px;font-weight:900;}.ring-label{font-size:11px;color:var(--text-muted);font-weight:600;}
+.bar-track{height:8px;border-radius:99px;background:var(--bg-soft);overflow:hidden;}
+.bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--primary),var(--primary-light));transition:width .7s var(--ease);}
+.bar-fill.gold{background:linear-gradient(90deg,var(--accent),#E8C46A);}.bar-fill.danger{background:linear-gradient(90deg,var(--danger),#E87B6A);}
+.grid{display:grid;gap:14px;}.grid-2{grid-template-columns:repeat(2,1fr);}.grid-3{grid-template-columns:repeat(3,1fr);}.grid-4{grid-template-columns:repeat(4,1fr);}
+@media(max-width:900px){.grid-4{grid-template-columns:repeat(2,1fr);}}@media(max-width:760px){.grid-3,.grid-4{grid-template-columns:repeat(2,1fr);}}@media(max-width:520px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);z-index:300;background:var(--bg-elevated);border:1px solid var(--primary);color:var(--primary);font-weight:700;padding:12px 22px;border-radius:99px;box-shadow:var(--shadow-l);opacity:0;transition:all .4s var(--ease);display:flex;align-items:center;gap:8px;max-width:90vw;text-align:center;pointer-events:none;}
+html[data-theme="dark"] .toast{color:var(--primary-light);}.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.celebrate-overlay{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;background:rgba(10,16,13,.75);backdrop-filter:blur(6px);}
 .celebrate-overlay.show{display:flex;}
-.celebrate-card{
-  position:relative; background:var(--bg-elevated); border-radius:var(--radius-xl); padding:42px 30px;
-  text-align:center; max-width:380px; width:90%; box-shadow:var(--shadow-l); overflow:hidden;
-  animation:celebrateIn .5s var(--ease);
-}
-@keyframes celebrateIn{from{opacity:0; transform:scale(.85) translateY(20px);} to{opacity:1; transform:scale(1) translateY(0);}}
-.celebrate-glow{position:absolute; inset:-40%; background:var(--gold-glow); pointer-events:none;}
-.celebrate-badge{
-  width:84px; height:84px; border-radius:50%; margin:0 auto 16px; display:flex; align-items:center; justify-content:center;
-  font-size:40px; background:linear-gradient(135deg, var(--accent), var(--primary)); box-shadow:0 0 0 8px var(--accent-soft);
-  animation:badgePulse 1.8s ease-in-out infinite;
-}
-@keyframes badgePulse{0%,100%{box-shadow:0 0 0 8px var(--accent-soft);} 50%{box-shadow:0 0 0 14px transparent;}}
-.confetti-piece{position:absolute; top:-10px; border-radius:2px; opacity:.9; animation:confettiFall linear forwards;}
-@keyframes confettiFall{to{transform:translateY(110vh) rotate(540deg); opacity:0;}}
-
-/* badge tile */
-.badge-tile{
-  display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; padding:18px 10px;
-  border-radius:var(--radius-m); border:1px solid var(--border-soft); background:var(--bg-elevated-2);
-}
-.badge-tile .ic{font-size:30px;}
-.badge-tile.locked{opacity:.35; filter:grayscale(1);}
-
-/* misc */
-.hero-greeting{
-  background:linear-gradient(145deg, var(--primary-dim), var(--bg-elevated) 60%); border:1px solid var(--border-soft);
-  border-radius:var(--radius-l); padding:24px 24px 92px; position:relative; overflow:hidden; margin-bottom:16px;
-}
-.hero-greeting::after{
-  content:""; position:absolute; inset-inline-end:-60px; top:-60px; width:200px; height:200px; border-radius:50%;
-  background:var(--gold-glow);
-}
-.hero-text{position:relative; z-index:2;}
-.mosque-deco{
-  position:absolute; inset-inline-start:0; inset-inline-end:0; bottom:0; width:100%; height:78px;
-  z-index:1; opacity:.4; pointer-events:none;
-}
-html[data-theme="dark"] .mosque-deco{opacity:.3;}
-.tab-row{display:flex; gap:8px; margin-bottom:16px; overflow-x:auto; padding-bottom:2px;}
-.tab-btn{
-  padding:9px 16px; border-radius:99px; border:1px solid var(--border); font-weight:700; font-size:13.5px;
-  white-space:nowrap; color:var(--text-muted); background:var(--bg-elevated);
-}
-.tab-btn.active{background:var(--primary); border-color:var(--primary); color:#fff;}
-.seg-toggle{display:flex; gap:8px;}
-.seg-toggle input{position:absolute; opacity:0; width:0; height:0; pointer-events:none;}
-.seg-toggle label{
-  flex:1; text-align:center; padding:11px 16px; border-radius:99px; border:1px solid var(--border); font-weight:700; font-size:14px;
-  color:var(--text-muted); background:var(--bg-elevated); cursor:pointer; transition:all .2s var(--ease); user-select:none;
-}
-.seg-toggle input:checked + label{background:var(--primary); border-color:var(--primary); color:#fff;}
-.seg-toggle input#txTypeIncome:checked + label{background:var(--success); border-color:var(--success);}
-.empty-state{text-align:center; padding:40px 16px; color:var(--text-muted);}
-.empty-state .ic{font-size:38px; margin-bottom:10px; opacity:.6;}
-.modal-overlay{position:fixed; inset:0; background:rgba(10,16,13,.5); backdrop-filter:blur(3px); z-index:250; display:none; align-items:flex-end; justify-content:center;}
-.modal-overlay.show{display:flex;}
-@media(min-width:640px){.modal-overlay{align-items:center;}}
-.modal{
-  background:var(--bg-elevated); width:100%; max-width:480px; border-radius:var(--radius-l) var(--radius-l) 0 0;
-  padding:22px; max-height:88vh; overflow-y:auto; animation:modalUp .35s var(--ease);
-}
+.celebrate-card{position:relative;background:var(--bg-elevated);border-radius:var(--radius-xl);padding:42px 30px;text-align:center;max-width:380px;width:90%;box-shadow:var(--shadow-l);overflow:hidden;animation:celebIn .5s var(--ease);}
+@keyframes celebIn{from{opacity:0;transform:scale(.85) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+.celebrate-glow{position:absolute;inset:-40%;background:var(--gold-glow);pointer-events:none;}
+.celebrate-badge{width:84px;height:84px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:40px;background:linear-gradient(135deg,var(--accent),var(--primary));box-shadow:0 0 0 8px var(--accent-soft);animation:badgePulse 1.8s ease-in-out infinite;}
+@keyframes badgePulse{0%,100%{box-shadow:0 0 0 8px var(--accent-soft);}50%{box-shadow:0 0 0 14px transparent;}}
+.confetti-piece{position:absolute;top:-10px;border-radius:2px;opacity:.9;animation:confettiFall linear forwards;}
+@keyframes confettiFall{to{transform:translateY(110vh) rotate(540deg);opacity:0;}}
+.badge-tile{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:18px 12px;border-radius:var(--radius-m);border:1px solid var(--border-soft);background:var(--bg-elevated-2);}
+.badge-tile.locked{opacity:.3;filter:grayscale(1);}
+.modal-overlay{position:fixed;inset:0;background:rgba(10,16,13,.55);backdrop-filter:blur(4px);z-index:250;display:none;align-items:flex-end;justify-content:center;}
+.modal-overlay.show{display:flex;}@media(min-width:640px){.modal-overlay{align-items:center;}}
+.modal{background:var(--bg-elevated);width:100%;max-width:500px;border-radius:var(--radius-l) var(--radius-l) 0 0;padding:24px;max-height:90vh;overflow-y:auto;animation:modalUp .35s var(--ease);}
 @media(min-width:640px){.modal{border-radius:var(--radius-l);}}
-@keyframes modalUp{from{transform:translateY(40px); opacity:0;} to{transform:translateY(0); opacity:1;}}
-.modal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
-.modal-head h3{margin:0; font-size:18px; font-weight:800;}
-.star-row{display:flex; gap:4px; font-size:22px;}
-.star{color:var(--border); cursor:pointer; transition:color .15s;}
-.star.on{color:var(--accent);}
-.fab{
-  position:fixed; bottom:24px; inset-inline-end:24px; z-index:30; width:56px; height:56px; border-radius:50%;
-  background:var(--primary); color:#fff; font-size:26px; display:flex; align-items:center; justify-content:center;
-  box-shadow:var(--shadow-l); transition:all .25s var(--ease); border:none;
-}
-.fab:hover{transform:scale(1.07); background:var(--primary-light);}
-.status-dot{width:8px; height:8px; border-radius:50%; display:inline-block;}
-.theme-toggle{
-  width:42px; height:42px; border-radius:12px; background:var(--bg-elevated); border:1px solid var(--border);
-  display:flex; align-items:center; justify-content:center; font-size:17px;
-}
-.skel{background:linear-gradient(90deg, var(--bg-soft), var(--border-soft), var(--bg-soft)); background-size:200% 100%; animation:shimmer 1.4s infinite;}
-@keyframes shimmer{to{background-position:-200% 0;}}
-.chart-bars{display:flex; align-items:flex-end; gap:8px; height:120px; padding-top:10px;}
-.chart-col{flex:1; display:flex; flex-direction:column; align-items:center; gap:6px;}
-.chart-fill{width:100%; border-radius:6px 6px 0 0; background:linear-gradient(180deg, var(--primary-light), var(--primary)); transition:height .6s var(--ease); min-height:3px;}
-.chart-lbl{font-size:11px; color:var(--text-muted); font-weight:600;}
-.streak-flame{font-size:22px;}
-.focus-task{display:flex; align-items:center; gap:10px; padding:12px; border-radius:var(--radius-s); border:1px solid var(--border-soft); margin-bottom:8px;}
-.pomo-ring{width:220px; height:220px; margin:0 auto;}
+@keyframes modalUp{from{transform:translateY(40px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}.modal-head h3{margin:0;font-size:18px;font-weight:800;}
+.empty-state{text-align:center;padding:50px 20px;color:var(--text-muted);}.empty-state .eic{font-size:42px;margin-bottom:10px;opacity:.6;}
+.seg-toggle{display:flex;gap:8px;}.seg-toggle input{position:absolute;opacity:0;width:0;height:0;pointer-events:none;}
+.seg-toggle label{flex:1;text-align:center;padding:10px 14px;border-radius:99px;border:1px solid var(--border);font-weight:700;font-size:14px;color:var(--text-muted);background:var(--bg-elevated);cursor:pointer;transition:all .2s var(--ease);user-select:none;}
+.seg-toggle input:checked+label{background:var(--primary);border-color:var(--primary);color:#fff;}
+.star-row{display:flex;gap:4px;font-size:22px;}.star{color:var(--border);cursor:pointer;transition:color .15s;}.star.on{color:var(--accent);}
+.fab{position:fixed;bottom:24px;inset-inline-end:24px;z-index:30;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(31,111,84,.4);transition:all .25s var(--ease);border:none;}
+.fab:hover{transform:scale(1.08);}
+.chart-bars{display:flex;align-items:flex-end;gap:6px;height:110px;}
+.chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;}
+.chart-fill{width:100%;border-radius:6px 6px 0 0;background:linear-gradient(180deg,var(--primary-light),var(--primary));transition:height .6s var(--ease);min-height:3px;}
+.chart-lbl{font-size:10.5px;color:var(--text-muted);font-weight:600;}
+.tab-row{display:flex;gap:8px;margin-bottom:18px;overflow-x:auto;padding-bottom:3px;}
+.tab-btn{padding:8px 16px;border-radius:99px;border:1px solid var(--border);font-weight:700;font-size:13px;white-space:nowrap;color:var(--text-muted);background:var(--bg-elevated);cursor:pointer;transition:all .2s var(--ease);}
+.tab-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+.stat-card{background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:var(--radius-m);padding:16px;display:flex;flex-direction:column;gap:4px;}
+.stat-val{font-size:26px;font-weight:900;}.stat-lbl{font-size:12px;color:var(--text-muted);font-weight:700;}
+.hero-greeting{background:linear-gradient(145deg,var(--primary-dim),var(--bg-elevated) 60%);border:1px solid var(--border-soft);border-radius:var(--radius-l);padding:24px 24px 80px;position:relative;overflow:hidden;margin-bottom:18px;}
+.hero-greeting::after{content:"";position:absolute;inset-inline-end:-60px;top:-60px;width:200px;height:200px;border-radius:50%;background:var(--gold-glow);}
+.hero-text{position:relative;z-index:2;}
+.mosque-deco{position:absolute;inset-inline-start:0;inset-inline-end:0;bottom:0;width:100%;height:70px;z-index:1;opacity:.35;pointer-events:none;}
+.heatmap-grid{display:flex;flex-wrap:wrap;gap:3px;}
+.hm-day{width:14px;height:14px;border-radius:3px;cursor:pointer;transition:transform .15s;border:1px solid rgba(0,0,0,.06);}
+.hm-day:hover{transform:scale(1.3);}
+.hm-0{background:var(--bg-soft);}.hm-1{background:#c6e6d4;}.hm-2{background:#74c89a;}.hm-3{background:#2FA876;}.hm-4{background:#1F6F54;}
+html[data-theme="dark"] .hm-1{background:#1a3d2c;}html[data-theme="dark"] .hm-2{background:#1e5c3d;}html[data-theme="dark"] .hm-3{background:#27804e;}html[data-theme="dark"] .hm-4{background:#36B888;}
+.emergency-overlay{position:fixed;inset:0;z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);padding:30px;}
+.emergency-overlay.show{display:flex;}
+.emergency-card{background:var(--bg-elevated);border:2px solid var(--primary);border-radius:var(--radius-xl);padding:30px 24px;max-width:420px;width:100%;text-align:center;box-shadow:var(--shadow-l);}
+.emergency-item{display:flex;align-items:center;gap:14px;padding:16px;border-radius:var(--radius-m);background:var(--primary-dim);border:1px solid var(--primary);margin-bottom:12px;text-align:start;}
+.life-status-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:99px;font-weight:800;font-size:15px;border:2px solid;}
+.status-green{background:var(--success-soft);border-color:var(--success);color:var(--success);}
+.status-yellow{background:var(--warning-soft);border-color:var(--warning);color:var(--warning);}
+.status-red{background:var(--danger-soft);border-color:var(--danger);color:var(--danger);}
+.now-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--radius-s);border:1px solid var(--border-soft);background:var(--bg-elevated-2);margin-bottom:10px;}
+.now-item .now-icon{font-size:20px;width:32px;text-align:center;}.now-item .now-label{font-size:12px;color:var(--text-muted);font-weight:600;}.now-item .now-val{font-size:15px;font-weight:700;}
+.water-btn{flex:1;padding:12px 8px;border-radius:var(--radius-s);border:1px solid var(--primary);background:var(--primary-dim);color:var(--primary);font-weight:800;font-size:14px;text-align:center;cursor:pointer;transition:all .2s var(--ease);}
+html[data-theme="dark"] .water-btn{color:var(--primary-light);}.water-btn:hover{background:var(--primary);color:#fff;}
+.vitamin-check{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--radius-s);border:1px solid var(--border-soft);background:var(--bg-elevated-2);margin-bottom:8px;cursor:pointer;transition:all .2s var(--ease);}
+.vitamin-check.taken{background:var(--success-soft);border-color:var(--success);}
+.mood-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;border-radius:var(--radius-m);border:2px solid var(--border);background:var(--bg-elevated-2);cursor:pointer;transition:all .2s var(--ease);font-size:13px;font-weight:700;}
+.mood-btn:hover{border-color:var(--primary);transform:scale(1.05);}
+.mood-btn.selected{border-color:var(--primary);background:var(--primary-dim);color:var(--primary);}
+html[data-theme="dark"] .mood-btn.selected{color:var(--primary-light);}.mood-emoji{font-size:28px;}
+.what-now-btn{width:100%;padding:20px;border-radius:var(--radius-l);background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;font-size:18px;font-weight:900;border:none;cursor:pointer;box-shadow:0 8px 24px rgba(31,111,84,.35);transition:all .3s var(--ease);display:flex;align-items:center;justify-content:center;gap:12px;}
+.what-now-btn:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(31,111,84,.45);}
+.suggestion-item{display:flex;align-items:center;gap:14px;padding:16px;border-radius:var(--radius-m);border:2px solid var(--primary);background:var(--primary-dim);margin-bottom:10px;}
+html[data-theme="dark"] .suggestion-item{border-color:var(--primary-light);}
+.focus-task-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--radius-s);border:1px solid var(--border-soft);background:var(--bg-elevated-2);margin-bottom:8px;}
+.pomo-display{font-size:56px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:1px;margin:12px 0;}
 </style>
 </head>
 <body>
-
 <div id="app" class="app-shell"></div>
-
 <div id="toast" class="toast"></div>
 <div id="celebrateOverlay" class="celebrate-overlay"></div>
 <div id="modalOverlay" class="modal-overlay"></div>
-
+<div id="emergencyOverlay" class="emergency-overlay"></div>
 <script>
-/* =====================================================================
-   MY LIFE — personal productivity app
-   Vanilla JS, single file, persisted via window.storage (per-user, private)
-   ===================================================================== */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const todayKey=(d=new Date())=>d.toISOString().slice(0,10);
+const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+const esc=(s='')=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const GREG_MONTHS=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const WEEKDAYS_AR=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const HIJRI_MONTHS=['محرم','صفر','ربيع الأول','ربيع الآخر','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
+function hijriDate(date=new Date()){try{const f=new Intl.DateTimeFormat('en-TN-u-ca-islamic',{day:'numeric',month:'numeric',year:'numeric'});const p=f.formatToParts(date).reduce((a,x)=>(a[x.type]=x.value,a),{});return `${p.day} ${HIJRI_MONTHS[parseInt(p.month,10)-1]||''} ${p.year}هـ`;}catch(e){return '';}}
+function gregorianStr(date=new Date()){return `${WEEKDAYS_AR[date.getDay()]}، ${date.getDate()} ${GREG_MONTHS[date.getMonth()]} ${date.getFullYear()}`;}
 
-/* ---------- tiny utils ---------- */
-const $ = (sel, root=document) => root.querySelector(sel);
-const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
-const todayKey = (d=new Date()) => d.toISOString().slice(0,10);
-const clamp = (n,a,b) => Math.max(a, Math.min(b,n));
-const esc = (s='') => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-
-const GREG_MONTHS = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-const WEEKDAYS_AR = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-const HIJRI_MONTHS = ['محرم','صفر','ربيع الأول','ربيع الآخر','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'];
-
-function hijriDate(date=new Date()){
-  try{
-    const f = new Intl.DateTimeFormat('en-TN-u-ca-islamic', {day:'numeric', month:'numeric', year:'numeric'});
-    const parts = f.formatToParts(date).reduce((a,p)=>(a[p.type]=p.value,a),{});
-    const m = parseInt(parts.month,10)-1;
-    return `${parts.day} ${HIJRI_MONTHS[m] || ''} ${parts.year}هـ`;
-  }catch(e){ return ''; }
-}
-function gregorianStr(date=new Date()){
-  return `${WEEKDAYS_AR[date.getDay()]}، ${date.getDate()} ${GREG_MONTHS[date.getMonth()]} ${date.getFullYear()}`;
-}
-
-/* ---------- storage layer (window.storage, private/per-user) ---------- */
-const LOCAL_PREFIX = 'mylife:';
-const hasCloudStorage = () => (typeof window.storage !== 'undefined') && window.storage && typeof window.storage.get === 'function';
-const Store = {
-  async get(key, fallback){
-    if(hasCloudStorage()){
-      try{
-        const r = await window.storage.get(key, false);
-        if(r) return JSON.parse(r.value);
-      }catch(e){}
-    }
-    try{
-      const raw = localStorage.getItem(LOCAL_PREFIX+key);
-      return raw ? JSON.parse(raw) : fallback;
-    }catch(e){ return fallback; }
-  },
-  async set(key, value){
-    try{ localStorage.setItem(LOCAL_PREFIX+key, JSON.stringify(value)); }catch(e){}
-    if(hasCloudStorage()){
-      try{ await window.storage.set(key, JSON.stringify(value), false); }
-      catch(e){ console.error('cloud storage set failed, using local backup', key, e); }
-    }
-  }
+const LOCAL_PREFIX='mylife3:';
+const hasCloud=()=>typeof window.storage!=='undefined'&&window.storage&&typeof window.storage.get==='function';
+const Store={
+  async get(key,fallback){if(hasCloud()){try{const r=await window.storage.get(key,false);if(r)return JSON.parse(r.value);}catch(e){}}try{const raw=localStorage.getItem(LOCAL_PREFIX+key);return raw?JSON.parse(raw):fallback;}catch(e){return fallback;}},
+  async set(key,value){try{localStorage.setItem(LOCAL_PREFIX+key,JSON.stringify(value));}catch(e){}if(hasCloud()){try{await window.storage.set(key,JSON.stringify(value),false);}catch(e){}}}
 };
 
-/* ---------- in-memory cache (loaded at boot) ---------- */
-const DB = {
-  settings: { theme:'light', username:'عثمان' },
-  prayerHistory: {},
-  quranProgress: {},
-  books: [],
-  journal: [],
-  courses: [],
-  lessons: [],
-  goals2026: [],
-  focusTasks: {},
-  achievementsSeen: [],
-  wallet: { instapay: 0, cash: 0 },
-  transactions: []
-};
-
-const HABIT_KEYS = ['fajr','dhuhr','asr','maghrib','isha','sFajr','sDhuhr','sMaghrib','sIsha','duha','witr','qiyam','adhkarS','adhkarM','quranWird'];
-const OBLIGATORY = ['fajr','dhuhr','asr','maghrib','isha'];
-
-function emptyDay(){ const o={}; HABIT_KEYS.forEach(k=>o[k]=false); return o; }
-function getDay(key){ if(!DB.prayerHistory[key]) DB.prayerHistory[key]=emptyDay(); return DB.prayerHistory[key]; }
+const DB={settings:{theme:'light',username:'عثمان',city:'القاهرة'},prayerHistory:{},quranProgress:{surahs:{}},books:[],journal:[],courses:[],lessons:[],goals2026:[],focusTasks:{},achievementsSeen:[],wallet:{instapay:0,cash:0},transactions:[],mood:{},health:{water:{},vitamins:[],vitaminLog:{},meals:[],workoutPlans:[],workoutLog:[],bodyStats:[]},analytics:{xp:0,level:1},heatmapNotes:{}};
+const HABIT_KEYS=['fajr','dhuhr','asr','maghrib','isha','sFajr','sDhuhr','sMaghrib','sIsha','duha','witr','qiyam','adhkarS','adhkarM','quranWird'];
+const OBLIGATORY=['fajr','dhuhr','asr','maghrib','isha'];
+const HOME_PCT_KEYS=['fajr','dhuhr','asr','maghrib','isha','adhkarS','adhkarM'];
+function emptyDay(){const o={};HABIT_KEYS.forEach(k=>o[k]=false);return o;}
+function getDay(key){if(!DB.prayerHistory[key])DB.prayerHistory[key]=emptyDay();return DB.prayerHistory[key];}
 
 async function loadAll(){
-  DB.settings = await Store.get('settings', { theme:'light', username:'عثمان' });
-  DB.prayerHistory = await Store.get('prayer-history', {});
-  DB.quranProgress = await Store.get('quran-progress', {});
-  DB.books = await Store.get('books', []);
-  DB.journal = await Store.get('journal-entries', []);
-  DB.courses = await Store.get('courses', []);
-  DB.lessons = await Store.get('islamic-lessons', []);
-  DB.goals2026 = await Store.get('goals-2026', []);
-  DB.focusTasks = await Store.get('focus-tasks', {});
-  DB.achievementsSeen = await Store.get('achievements-seen', []);
-  DB.wallet = await Store.get('wallet', { instapay: 0, cash: 0 });
-  DB.transactions = await Store.get('transactions', []);
+  DB.settings=await Store.get('settings',{theme:'light',username:'عثمان',city:'القاهرة'});
+  DB.prayerHistory=await Store.get('prayer-history',{});
+  DB.quranProgress=await Store.get('quran-progress',{surahs:{}});
+  if(!DB.quranProgress.surahs)DB.quranProgress.surahs={};
+  DB.books=await Store.get('books',[]);
+  DB.journal=await Store.get('journal-entries',[]);
+  DB.courses=await Store.get('courses',[]);
+  DB.lessons=await Store.get('islamic-lessons',[]);
+  DB.goals2026=await Store.get('goals-2026',[]);
+  DB.focusTasks=await Store.get('focus-tasks',{});
+  DB.achievementsSeen=await Store.get('achievements-seen',[]);
+  DB.wallet=await Store.get('wallet',{instapay:0,cash:0});
+  DB.transactions=await Store.get('transactions',[]);
+  DB.mood=await Store.get('mood',{});
+  DB.health=await Store.get('health',{water:{},vitamins:[],vitaminLog:{},meals:[],workoutPlans:[],workoutLog:[],bodyStats:[]});
+  if(!DB.health.water)DB.health.water={};if(!DB.health.vitamins)DB.health.vitamins=[];
+  if(!DB.health.vitaminLog)DB.health.vitaminLog={};if(!DB.health.meals)DB.health.meals=[];
+  if(!DB.health.workoutPlans)DB.health.workoutPlans=[];if(!DB.health.workoutLog)DB.health.workoutLog=[];
+  if(!DB.health.bodyStats)DB.health.bodyStats=[];
+  DB.analytics=await Store.get('analytics',{xp:0,level:1});
+  DB.heatmapNotes=await Store.get('heatmap-notes',{});
 }
-const persist = {
-  settings: () => Store.set('settings', DB.settings),
-  prayerHistory: () => Store.set('prayer-history', DB.prayerHistory),
-  quranProgress: () => Store.set('quran-progress', DB.quranProgress),
-  books: () => Store.set('books', DB.books),
-  journal: () => Store.set('journal-entries', DB.journal),
-  courses: () => Store.set('courses', DB.courses),
-  lessons: () => Store.set('islamic-lessons', DB.lessons),
-  goals2026: () => Store.set('goals-2026', DB.goals2026),
-  focusTasks: () => Store.set('focus-tasks', DB.focusTasks),
-  achievementsSeen: () => Store.set('achievements-seen', DB.achievementsSeen),
-  wallet: () => Store.set('wallet', DB.wallet),
-  transactions: () => Store.set('transactions', DB.transactions),
+const persist={
+  settings:()=>Store.set('settings',DB.settings),
+  prayerHistory:()=>Store.set('prayer-history',DB.prayerHistory),
+  quranProgress:()=>Store.set('quran-progress',DB.quranProgress),
+  books:()=>Store.set('books',DB.books),
+  journal:()=>Store.set('journal-entries',DB.journal),
+  courses:()=>Store.set('courses',DB.courses),
+  lessons:()=>Store.set('islamic-lessons',DB.lessons),
+  goals2026:()=>Store.set('goals-2026',DB.goals2026),
+  focusTasks:()=>Store.set('focus-tasks',DB.focusTasks),
+  achievementsSeen:()=>Store.set('achievements-seen',DB.achievementsSeen),
+  wallet:()=>Store.set('wallet',DB.wallet),
+  transactions:()=>Store.set('transactions',DB.transactions),
+  mood:()=>Store.set('mood',DB.mood),
+  health:()=>Store.set('health',DB.health),
+  analytics:()=>Store.set('analytics',DB.analytics),
+  heatmapNotes:()=>Store.set('heatmap-notes',DB.heatmapNotes),
 };
 
-/* ---------- toast / motivation ---------- */
-const MOTIVATION = ['أحسنت، استمر.','ما شاء الله عليك.','خطوة صغيرة اليوم تصنع مستقبلاً عظيماً.','بارك الله فيك.','اقتربت من هدفك.','الله يعينك ويبارك في وقتك.','أنت أقرب لهدفك مما تظن.'];
+const MOTIVATION=['أحسنت، استمر 💪','ما شاء الله عليك ✨','بارك الله فيك 🌿','اقتربت من هدفك 🎯','الله يعينك ويبارك في وقتك 🤲','خطوة صغيرة تصنع مستقبلاً عظيماً 🚀','أنت أقرب مما تظن 🌅'];
+const GREETINGS=['أهلاً بعودتك يا {name} 👋','يوم جديد وفرصة جديدة يا {name}','استمر يا {name}، أنت تتقدم أكثر مما تظن','القرآن ينتظرك يا {name} 📖','ماذا سننجز اليوم يا {name}؟ 🎯','بارك الله في يومك يا {name} 🤲','{name} — كل يوم فرصة للتجديد ✨','خطوة صغيرة اليوم تصنع فرقاً يا {name} 🌟'];
 let toastTimer=null;
-function showToast(msg, icon='✨'){
-  const t = $('#toast');
-  if(!t) return;
-  t.innerHTML = `<span>${icon}</span><span>${esc(msg)}</span>`;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
-}
-function randomMotivation(){ showToast(MOTIVATION[Math.floor(Math.random()*MOTIVATION.length)], '🌿'); }
+function showToast(msg,icon='✨'){const t=$('#toast');if(!t)return;t.innerHTML=`<span>${icon}</span><span>${esc(msg)}</span>`;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2800);}
+function randomMotivation(){showToast(MOTIVATION[Math.floor(Math.random()*MOTIVATION.length)],'🌿');}
+function dailyGreeting(){const idx=new Date().getDate()%GREETINGS.length;return GREETINGS[idx].replace(/\{name\}/g,DB.settings.username||'عثمان');}
+function fireConfetti(container){const colors=['#2FA876','#C9A24B','#36B888','#E9D9A8','#1F6F54','#D8B662'];for(let i=0;i<60;i++){const p=document.createElement('div');p.className='confetti-piece';const size=5+Math.random()*7;p.style.cssText=`width:${size}px;height:${size*1.6}px;left:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${2.2+Math.random()*1.6}s;animation-delay:${Math.random()*.6}s;`;container.appendChild(p);}}
+function celebrateFullScreen(title='مبارك عليك، أتممت فرائض اليوم',sub='جعله الله في ميزان حسناتك'){const ov=$('#celebrateOverlay');ov.innerHTML=`<div class="celebrate-card" id="celebrateCard"><div class="celebrate-glow"></div><div class="celebrate-badge">🏆</div><div style="font-size:20px;font-weight:900;margin-bottom:8px;" class="font-amiri">${title}</div><div class="muted" style="font-size:14px;margin-bottom:22px;">${sub}</div><button class="btn btn-primary" style="width:100%;" onclick="closeCelebrate()">الحمد لله 🤲</button></div>`;fireConfetti($('#celebrateCard'));ov.classList.add('show');addXP(50);}
+function closeCelebrate(){$('#celebrateOverlay').classList.remove('show');}
+function openModal(html){const ov=$('#modalOverlay');ov.innerHTML=`<div class="modal">${html}</div>`;ov.classList.add('show');ov.onclick=e=>{if(e.target===ov)closeModal();};}
+function closeModal(){$('#modalOverlay').classList.remove('show');}
+function addXP(amount){DB.analytics.xp=(DB.analytics.xp||0)+amount;const nl=Math.floor(DB.analytics.xp/500)+1;if(nl>DB.analytics.level){DB.analytics.level=nl;showToast(`وصلت للمستوى ${nl}! 🎉`,'⭐');}persist.analytics();}
+function applyTheme(){document.documentElement.setAttribute('data-theme',DB.settings.theme);}
+function toggleTheme(){DB.settings.theme=DB.settings.theme==='light'?'dark':'light';applyTheme();persist.settings();renderTopbarTheme();}
+function renderTopbarTheme(){const el=$('#themeToggleBtn');if(el)el.textContent=DB.settings.theme==='light'?'🌙':'☀️';}
+function dayCompletionPct(day){const done=HOME_PCT_KEYS.filter(k=>day[k]).length;return Math.round((done/HOME_PCT_KEYS.length)*100);}
+function allObligatoryDone(day){return OBLIGATORY.every(k=>day[k]);}
+function computeStreak(){let s=0,d=new Date();while(true){const day=DB.prayerHistory[todayKey(d)];if(day&&allObligatoryDone(day)){s++;d.setDate(d.getDate()-1);}else break;}return s;}
+function computeLongestStreak(){const dates=Object.keys(DB.prayerHistory).filter(k=>allObligatoryDone(DB.prayerHistory[k])).sort();let longest=0,cur=0,prev=null;for(const ds of dates){const d=new Date(ds);if(prev&&(d-prev)/86400000===1)cur++;else cur=1;longest=Math.max(longest,cur);prev=d;}return longest;}
+function totalCompletedDays(){return Object.values(DB.prayerHistory).filter(allObligatoryDone).length;}
+function last7DaysPct(){const out=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const day=DB.prayerHistory[todayKey(d)]||emptyDay();out.push({label:WEEKDAYS_AR[d.getDay()].slice(0,3),pct:dayCompletionPct(day)});}return out;}
+function computeDayScore(dateKey){const day=DB.prayerHistory[dateKey]||emptyDay();let s=dayCompletionPct(day)*.5;if(DB.quranProgress.updatedAt&&DB.quranProgress.updatedAt.startsWith(dateKey))s+=20;if(DB.courses.some(c=>c.updatedAt&&c.updatedAt.startsWith(dateKey)))s+=20;if(DB.goals2026.some(g=>g.done&&g.doneAt&&g.doneAt.startsWith(dateKey)))s+=10;return Math.min(100,s);}
 
-/* ---------- celebration ---------- */
-function fireConfetti(container){
-  const colors = ['#2FA876','#C9A24B','#36B888','#E9D9A8','#1F6F54'];
-  for(let i=0;i<60;i++){
-    const p = document.createElement('div');
-    p.className='confetti-piece';
-    const size = 5+Math.random()*7;
-    p.style.width = size+'px'; p.style.height=(size*1.6)+'px';
-    p.style.left = Math.random()*100+'%';
-    p.style.background = colors[Math.floor(Math.random()*colors.length)];
-    p.style.animationDuration = (2.2+Math.random()*1.6)+'s';
-    p.style.animationDelay = (Math.random()*0.6)+'s';
-    container.appendChild(p);
-  }
-}
-function celebrateFullScreen(){
-  const ov = $('#celebrateOverlay');
-  ov.innerHTML = `
-    <div class="celebrate-card" id="celebrateCard">
-      <div class="celebrate-glow"></div>
-      <div class="celebrate-badge">🏆</div>
-      <div style="font-size:20px; font-weight:900; margin-bottom:8px;" class="font-amiri">مبارك عليك، أتممت فرائض اليوم</div>
-      <div class="muted" style="font-size:14px; margin-bottom:20px;">جعله الله في ميزان حسناتك ✨</div>
-      <button class="btn btn-primary" style="width:100%;" onclick="closeCelebrate()">الحمد لله</button>
-    </div>`;
-  fireConfetti($('#celebrateCard'));
-  ov.classList.add('show');
-}
-function closeCelebrate(){ $('#celebrateOverlay').classList.remove('show'); }
+let CURRENT_PAGE='home';
+let WORSHIP_DATE=todayKey();
+let HEALTH_TAB='water';
+let quranSearchQuery='';
 
-/* ---------- modal helper ---------- */
-function openModal(html){
-  const ov = $('#modalOverlay');
-  ov.innerHTML = `<div class="modal">${html}</div>`;
-  ov.classList.add('show');
-  ov.onclick = (e)=>{ if(e.target===ov) closeModal(); };
-}
-function closeModal(){ $('#modalOverlay').classList.remove('show'); }
-
-/* ---------- theme ---------- */
-function applyTheme(){
-  document.documentElement.setAttribute('data-theme', DB.settings.theme);
-}
-function toggleTheme(){
-  DB.settings.theme = DB.settings.theme==='light' ? 'dark' : 'light';
-  applyTheme(); persist.settings(); renderTopbarTheme();
-}
-function renderTopbarTheme(){
-  const el = $('#themeToggleBtn');
-  if(el) el.textContent = DB.settings.theme==='light' ? '🌙' : '☀️';
-}
-
-/* ---------- router ---------- */
-let CURRENT_PAGE = 'home';
-const PAGES = [
-  {id:'home', label:'الرئيسية', icon:'🏠'},
-  {id:'quran', label:'حفظ القرآن', icon:'📖'},
-  {id:'books', label:'المكتبة', icon:'📚'},
-  {id:'journal', label:'اليوميات', icon:'✍️'},
-  {id:'courses', label:'الكورسات', icon:'🎓'},
-  {id:'lessons', label:'الدروس الإسلامية', icon:'🕌'},
-  {id:'goals', label:'أهداف 2026', icon:'🎯'},
-  {id:'achievements', label:'الإنجازات', icon:'🏆'},
-  {id:'focus', label:'مركز التركيز', icon:'🧠'},
-  {id:'wallet', label:'المحفظة', icon:'💰'},
+const PAGES=[
+  {id:'home',label:'الرئيسية',icon:'🏠',group:'main'},
+  {id:'osmanNow',label:'عثمان الآن',icon:'⚡',group:'main'},
+  {id:'worship',label:'العبادات',icon:'🕌',group:'main'},
+  {id:'quran',label:'حفظ القرآن',icon:'📖',group:'main'},
+  {id:'focus',label:'مركز التركيز',icon:'🧠',group:'main'},
+  {id:'health',label:'Health Hub',icon:'💪',group:'health'},
+  {id:'books',label:'المكتبة',icon:'📚',group:'learning'},
+  {id:'courses',label:'الكورسات',icon:'🎓',group:'learning'},
+  {id:'lessons',label:'الدروس الدينية',icon:'🕌',group:'learning'},
+  {id:'journal',label:'اليوميات',icon:'✍️',group:'personal'},
+  {id:'wallet',label:'المحفظة',icon:'💰',group:'personal'},
+  {id:'goals',label:'أهداف 2026',icon:'🎯',group:'personal'},
+  {id:'achievements',label:'الإنجازات',icon:'🏆',group:'personal'},
+  {id:'heatmap',label:'خريطة العام',icon:'📅',group:'analytics'},
+  {id:'analytics',label:'التحليلات',icon:'📊',group:'analytics'},
 ];
-const STATE = { sidebarOpen:false };
-function navigate(pageId){
-  CURRENT_PAGE = pageId;
-  closeSidebar();
-  renderApp();
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-function toggleSidebar(force){
-  STATE.sidebarOpen = force!==undefined ? force : !STATE.sidebarOpen;
-  $('#sidebar')?.classList.toggle('open', STATE.sidebarOpen);
-  $('#sidebarOverlay')?.classList.toggle('show', STATE.sidebarOpen);
-}
-function closeSidebar(){ toggleSidebar(false); }
+function navigate(pageId){CURRENT_PAGE=pageId;closeSidebar();renderApp();window.scrollTo({top:0,behavior:'smooth'});}
+function toggleSidebar(force){const open=force!==undefined?force:!$('#sidebar')?.classList.contains('open');$('#sidebar')?.classList.toggle('open',open);$('#sidebarOverlay')?.classList.toggle('show',open);}
+function closeSidebar(){toggleSidebar(false);}
 
-/* ====================== SHELL RENDER ====================== */
 function renderShell(){
-  const app = $('#app');
-  app.innerHTML = `
+  const app=$('#app');
+  const groups={main:'الرئيسي',health:'الصحة',learning:'التعلم',personal:'الشخصي',analytics:'التحليلات'};
+  let navHtml='';let lastGroup='';
+  PAGES.forEach(p=>{if(p.group!==lastGroup){navHtml+=`<div class="nav-section-label">${groups[p.group]||p.group}</div>`;lastGroup=p.group;}navHtml+=`<a class="nav-item ${CURRENT_PAGE===p.id?'active':''}" onclick="navigate('${p.id}')"><span class="ic">${p.icon}</span><span>${p.label}</span></a>`;});
+  app.innerHTML=`
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
     <nav class="sidebar" id="sidebar">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:22px;">
-        <div class="logo-wrap"><div class="logo-mark">ML</div><div class="logo-text">MY LIFE</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+        <div class="logo-wrap"><div class="logo-mark">OS</div><div class="logo-text">MY LIFE OS</div></div>
         <button class="btn btn-icon btn-ghost" onclick="closeSidebar()">✕</button>
       </div>
-      <div style="flex:1; overflow-y:auto;">
-        ${PAGES.map(p=>`<a class="nav-item ${CURRENT_PAGE===p.id?'active':''}" onclick="navigate('${p.id}')"><span class="ic">${p.icon}</span><span>${p.label}</span></a>`).join('')}
-      </div>
-      <div style="border-top:1px solid var(--border-soft); padding-top:14px; margin-top:10px;">
+      <div style="flex:1;overflow-y:auto;">${navHtml}</div>
+      <div style="border-top:1px solid var(--border-soft);padding-top:14px;margin-top:10px;">
+        <div style="background:var(--primary-dim);border-radius:var(--radius-s);padding:12px;margin-bottom:10px;display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;">⭐</div>
+          <div><div style="font-weight:800;font-size:13px;">المستوى ${DB.analytics.level}</div><div style="font-size:11px;color:var(--text-muted);">${DB.analytics.xp} XP</div></div>
+        </div>
+        <button class="btn" style="width:100%;margin-bottom:6px;" onclick="openEmergencyMode()">🆘 أنا مرهق الآن</button>
         <a class="nav-item" onclick="openSettingsModal()"><span class="ic">⚙️</span><span>الإعدادات</span></a>
       </div>
     </nav>
-    <div style="flex:1; min-width:0;">
+    <div style="flex:1;min-width:0;">
       <div class="topbar">
         <div class="logo-wrap">
           <button class="hamburger" onclick="toggleSidebar()">☰</button>
-          <span class="logo-text" style="font-size:15px;">MY LIFE</span>
+          <span class="logo-text" style="font-size:14px;">MY LIFE OS</span>
         </div>
-        <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()">🌙</button>
+        <div class="topbar-right">
+          <div style="font-size:12px;font-weight:700;color:var(--primary);background:var(--primary-dim);padding:5px 10px;border-radius:99px;">⭐ Lv.${DB.analytics.level}</div>
+          <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()">🌙</button>
+        </div>
       </div>
       <main class="main">
         ${PAGES.map(p=>`<section class="page ${CURRENT_PAGE===p.id?'active':''}" id="page-${p.id}"></section>`).join('')}
@@ -535,1057 +311,544 @@ function renderShell(){
   `;
   renderTopbarTheme();
 }
-
 function renderApp(){
-  $$('.nav-item').forEach((el,i)=>{ if(PAGES[i]) el.classList.toggle('active', PAGES[i].id===CURRENT_PAGE); });
-  $$('.page').forEach(el=>el.classList.toggle('active', el.id===`page-${CURRENT_PAGE}`));
-  const fab = $('#fabBtn');
-  fab.style.display = ['home','achievements','quran'].includes(CURRENT_PAGE) ? 'none' : 'flex';
-  fab.onclick = () => handleFab();
+  $$('.nav-item').forEach(el=>{const m=el.getAttribute('onclick')?.match(/navigate\('(\w+)'\)/);if(m)el.classList.toggle('active',m[1]===CURRENT_PAGE);});
+  $$('.page').forEach(el=>el.classList.toggle('active',el.id===`page-${CURRENT_PAGE}`));
+  const fab=$('#fabBtn');
+  const fabMap={books:openBookModal,journal:openJournalModal,courses:openCourseModal,lessons:openLessonModal,goals:openGoalItemModal,wallet:openTransactionModal,focus:openFocusTaskModal,health:()=>openHealthFab()};
+  fab.style.display=['home','achievements','quran','heatmap','analytics','osmanNow'].includes(CURRENT_PAGE)?'none':'flex';
+  fab.onclick=()=>(fabMap[CURRENT_PAGE]||(()=>{}))();
   renderPage(CURRENT_PAGE);
 }
+function renderPage(id){const fns={home:renderHome,worship:renderWorship,quran:renderQuran,books:renderBooks,journal:renderJournal,courses:renderCourses,lessons:renderLessons,goals:renderGoals,achievements:renderAchievements,focus:renderFocus,wallet:renderWallet,osmanNow:renderOsmanNow,heatmap:renderHeatmap,analytics:renderAnalytics,health:renderHealth};(fns[id]||(()=>{}))();}
 
-function handleFab(){
-  const map = {
-    books: openBookModal, journal: openJournalModal,
-    courses: openCourseModal, lessons: openLessonModal, goals: openGoalItemModal,
-    wallet: openTransactionModal,
-    focus: openFocusTaskModal,
-  };
-  (map[CURRENT_PAGE] || (()=>{}))();
-}
-
-function renderPage(id){
-  const fns = {
-    home: renderHome, quran: renderQuran, books: renderBooks, journal: renderJournal,
-    courses: renderCourses, lessons: renderLessons, goals: renderGoals,
-    achievements: renderAchievements, focus: renderFocus, wallet: renderWallet,
-  };
-  (fns[id] || (()=>{}))();
-}
-
-/* ---------- settings modal ---------- */
 function openSettingsModal(){
   openModal(`
-    <div class="modal-head"><h3>الإعدادات</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field"><label>اسمك</label><input id="setUsername" value="${esc(DB.settings.username)}" placeholder="اكتب اسمك هنا"></div>
-    <div class="field">
-      <label>المظهر</label>
-      <div style="display:flex; gap:8px;">
-        <button class="btn ${DB.settings.theme==='light'?'btn-primary':''}" style="flex:1" onclick="setThemeChoice('light')">☀️ فاتح</button>
-        <button class="btn ${DB.settings.theme==='dark'?'btn-primary':''}" style="flex:1" onclick="setThemeChoice('dark')">🌙 داكن</button>
-      </div>
-    </div>
-    <button class="btn btn-primary" style="width:100%; margin-top:6px;" onclick="saveSettings()">حفظ</button>
-    <div style="border-top:1px solid var(--border-soft); margin-top:18px; padding-top:14px;">
-      <label>نسخة احتياطية من بياناتك</label>
-      <div class="muted" style="font-size:12px; margin-bottom:10px;">احفظ نسخة من كل بياناتك على جهازك، أو استرجعها لو اتمسحت</div>
-      <div style="display:flex; gap:8px;">
-        <button class="btn" style="flex:1" onclick="exportBackup()">⬇️ تنزيل نسخة احتياطية</button>
-        <button class="btn" style="flex:1" onclick="document.getElementById('importBackupInput').click()">⬆️ استرجع نسخة</button>
-      </div>
-      <input type="file" id="importBackupInput" accept="application/json" style="display:none" onchange="importBackup(this.files[0])">
-    </div>
+    <div class="modal-head"><h3>⚙️ الإعدادات</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
+    <div class="field"><label>اسمك</label><input id="setUsername" value="${esc(DB.settings.username)}"></div>
+    <div class="field"><label>مدينتك</label><input id="setCity" value="${esc(DB.settings.city||'القاهرة')}"></div>
+    <div class="field"><label>المظهر</label><div style="display:flex;gap:8px;"><button class="btn ${DB.settings.theme==='light'?'btn-primary':''}" style="flex:1" onclick="setThemeChoice('light')">☀️ فاتح</button><button class="btn ${DB.settings.theme==='dark'?'btn-primary':''}" style="flex:1" onclick="setThemeChoice('dark')">🌙 داكن</button></div></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:6px;" onclick="saveSettings()">حفظ</button>
+    <div style="border-top:1px solid var(--border-soft);margin-top:18px;padding-top:16px;"><label>النسخ الاحتياطي</label><div style="display:flex;gap:8px;margin-top:8px;"><button class="btn" style="flex:1" onclick="exportBackup()">⬇️ تنزيل</button><button class="btn" style="flex:1" onclick="document.getElementById('importInput').click()">⬆️ استرجاع</button></div><input type="file" id="importInput" accept="application/json" style="display:none" onchange="importBackup(this.files[0])"></div>
   `);
 }
-function setThemeChoice(t){
-  DB.settings.theme=t;
-  applyTheme();
-  persist.settings();
-  renderTopbarTheme();
-  openSettingsModal();
-}
-function saveSettings(){
-  DB.settings.username = $('#setUsername').value.trim();
-  persist.settings();
-  closeModal();
-  renderApp();
-}
-function exportBackup(){
-  const backup = {
-    exportedAt: new Date().toISOString(),
-    settings: DB.settings,
-    prayerHistory: DB.prayerHistory,
-    quranProgress: DB.quranProgress,
-    books: DB.books,
-    journal: DB.journal,
-    courses: DB.courses,
-    lessons: DB.lessons,
-    goals2026: DB.goals2026,
-    focusTasks: DB.focusTasks,
-    achievementsSeen: DB.achievementsSeen,
-    wallet: DB.wallet,
-    transactions: DB.transactions
-  };
-  const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `my-life-backup-${todayKey()}.json`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-  showToast('تم تنزيل نسخة احتياطية','💾');
-}
-async function importBackup(file){
-  if(!file) return;
-  try{
-    const text = await file.text();
-    const backup = JSON.parse(text);
-    if(backup.settings) DB.settings = backup.settings;
-    if(backup.prayerHistory) DB.prayerHistory = backup.prayerHistory;
-    if(backup.quranProgress) DB.quranProgress = backup.quranProgress;
-    if(backup.books) DB.books = backup.books;
-    if(backup.journal) DB.journal = backup.journal;
-    if(backup.courses) DB.courses = backup.courses;
-    if(backup.lessons) DB.lessons = backup.lessons;
-    if(backup.goals2026) DB.goals2026 = backup.goals2026;
-    if(backup.focusTasks) DB.focusTasks = backup.focusTasks;
-    if(backup.achievementsSeen) DB.achievementsSeen = backup.achievementsSeen;
-    if(backup.wallet) DB.wallet = backup.wallet;
-    if(backup.transactions) DB.transactions = backup.transactions;
-    await Promise.all(Object.values(persist).map(fn=>fn()));
-    applyTheme();
-    closeModal();
-    renderApp();
-    showToast('تم استرجاع بياناتك بنجاح','✅');
-  }catch(e){
-    showToast('حصل خطأ، تأكد إن الملف نسخة احتياطية صحيحة','⚠️');
-  }
-}
-
-/* ====================== HOME PAGE ====================== */
-const HABIT_GROUPS = [
-  {title:'الفرائض', keys:[['fajr','الفجر'],['dhuhr','الظهر'],['asr','العصر'],['maghrib','المغرب'],['isha','العشاء']], obligatory:true},
-  {title:'السنن الرواتب', keys:[['sFajr','سنة الفجر'],['sDhuhr','سنة الظهر'],['sMaghrib','سنة المغرب'],['sIsha','سنة العشاء']]},
-  {title:'عبادات إضافية', keys:[['duha','الضحى'],['witr','الوتر'],['qiyam','قيام الليل']]},
-  {title:'الأذكار', keys:[['adhkarS','أذكار الصباح'],['adhkarM','أذكار المساء']]},
-  {title:'الذكر', keys:[['quranWird','ورد الذكر']]},
+function setThemeChoice(t){DB.settings.theme=t;applyTheme();persist.settings();renderTopbarTheme();openSettingsModal();}
+function saveSettings(){DB.settings.username=$('#setUsername').value.trim();DB.settings.city=$('#setCity').value.trim();persist.settings();closeModal();renderApp();showToast('تم حفظ الإعدادات','✅');}
+function exportBackup(){const backup={exportedAt:new Date().toISOString(),...Object.fromEntries(Object.keys(DB).map(k=>[k,DB[k]]))};const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`mylife-os-backup-${todayKey()}.json`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);showToast('تم تنزيل النسخة الاحتياطية','💾');}
+async function importBackup(file){if(!file)return;try{const text=await file.text();const b=JSON.parse(text);Object.keys(DB).forEach(k=>{if(b[k]!==undefined)DB[k]=b[k];});await Promise.all(Object.values(persist).map(fn=>fn()));applyTheme();closeModal();renderApp();showToast('تم استرجاع البيانات بنجاح','✅');}catch(e){showToast('خطأ في الاستيراد','⚠️');}}
+/* HOME */
+const HABIT_GROUPS=[
+  {title:'الفرائض',keys:[['fajr','🌅 الفجر'],['dhuhr','☀️ الظهر'],['asr','🌤 العصر'],['maghrib','🌇 المغرب'],['isha','🌙 العشاء']],obligatory:true},
+  {title:'السنن الرواتب',keys:[['sFajr','سنة الفجر'],['sDhuhr','سنة الظهر'],['sMaghrib','سنة المغرب'],['sIsha','سنة العشاء']]},
+  {title:'عبادات إضافية',keys:[['duha','الضحى'],['witr','الوتر'],['qiyam','قيام الليل']]},
+  {title:'الأذكار',keys:[['adhkarS','📿 أذكار الصباح'],['adhkarM','🌙 أذكار المساء']]},
+  {title:'الذكر اليومي',keys:[['quranWird','📖 ورد الذكر']]},
 ];
-const HOME_PCT_KEYS = ['fajr','dhuhr','asr','maghrib','isha','adhkarS','adhkarM'];
-function dayCompletionPct(day){
-  const done = HOME_PCT_KEYS.filter(k=>day[k]).length;
-  return Math.round((done/HOME_PCT_KEYS.length)*100);
-}
-function allObligatoryDone(day){
-  return OBLIGATORY.every(k=>day[k]);
-}
-function toggleHabit(key){
-  const day = getDay(todayKey());
-  day[key] = !day[key];
-  persist.prayerHistory();
-  if(day[key]){
-    randomMotivation();
-    checkAchievements();
-    if(OBLIGATORY.includes(key) && allObligatoryDone(day)){
-      setTimeout(celebrateFullScreen, 350);
-    }
-  }
-  renderHome();
-}
-function computeStreak(){
-  let streak=0;
-  let d=new Date();
-  while(true){
-    const day = DB.prayerHistory[todayKey(d)];
-    if(day && allObligatoryDone(day)){
-      streak++;
-      d.setDate(d.getDate()-1);
-    } else break;
-  }
-  return streak;
-}
-function computeLongestStreak(){
-  const dates = Object.keys(DB.prayerHistory).filter(k=>allObligatoryDone(DB.prayerHistory[k])).sort();
-  let longest=0, cur=0, prev=null;
-  for(const ds of dates){
-    const d = new Date(ds);
-    if(prev && (d - prev)/86400000 === 1) cur++;
-    else cur=1;
-    longest = Math.max(longest,cur);
-    prev=d;
-  }
-  return longest;
-}
-function totalCompletedDays(){
-  return Object.values(DB.prayerHistory).filter(allObligatoryDone).length;
-}
-function last7DaysPct(){
-  const out=[];
-  for(let i=6;i>=0;i--){
-    const d = new Date();
-    d.setDate(d.getDate()-i);
-    const day = DB.prayerHistory[todayKey(d)] || emptyDay();
-    out.push({label:WEEKDAYS_AR[d.getDay()].slice(0,3), pct:dayCompletionPct(day)});
-  }
-  return out;
-}
-
+function toggleHabit(key){const day=getDay(todayKey());day[key]=!day[key];persist.prayerHistory();if(day[key]){randomMotivation();checkAchievements();addXP(10);if(OBLIGATORY.includes(key)&&allObligatoryDone(day))setTimeout(()=>celebrateFullScreen(),350);}renderHome();}
 function renderHome(){
-  const h = $('#page-home');
-  const day = getDay(todayKey());
-  const pct = dayCompletionPct(day);
-  const streak = computeStreak();
-
-  const circumference = 2 * Math.PI * 73;
-  const offset = circumference - (pct / 100) * circumference;
-
-  h.innerHTML = `
+  const h=$('#page-home');const day=getDay(todayKey());const pct=dayCompletionPct(day);const streak=computeStreak();
+  const circ=2*Math.PI*70;const offset=circ-(pct/100)*circ;
+  const moods=[['😀','ممتاز'],['🙂','جيد'],['😐','عادي'],['😔','متعب'],['😞','سيء']];
+  const todayMood=DB.mood[todayKey()];
+  const totalTx=DB.transactions.filter(t=>t.date===todayKey());
+  const todaySpend=totalTx.filter(t=>t.type==='expense').reduce((a,t)=>a+t.amount,0);
+  const goalsTotal=DB.goals2026.length;const goalsDone=DB.goals2026.filter(g=>g.done).length;
+  const coursePct=DB.courses.length?Math.round(DB.courses.reduce((a,c)=>a+((c.completedHours||0)/(c.totalHours||1)),0)/DB.courses.length*100):0;
+  h.innerHTML=`
     <div class="hero-greeting">
       <div class="hero-text">
-        <div style="font-size:14px; opacity:.85; margin-bottom:4px;">${gregorianStr()} — ${hijriDate()}</div>
-        <h1 style="margin:0 0 6px 0; font-weight:800; font-size:26px;">السلام عليكم، يا <span class="name-font">${esc(DB.settings.username)}</span> 👋</h1>
-        <div class="muted" style="font-size:15px; max-width:550px;">يوم جديد فرصة جديدة لتبني عادات عظيمة، وتتقرب من أهدافك خطوة بخطوة.</div>
+        <div style="font-size:13px;opacity:.8;margin-bottom:4px;">${gregorianStr()} — ${hijriDate()}</div>
+        <h1 style="margin:0 0 6px;font-weight:800;font-size:24px;">${dailyGreeting()}</h1>
+        <div class="muted" style="font-size:14px;">يوم جديد وفرصة جديدة لتتقرب من أهدافك.</div>
       </div>
-      <div class="mosque-deco">
-        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style="width:100%; height:100%; fill:var(--primary); opacity:.12;">
-          <path d="M0,120 L1200,120 L1200,100 C1150,90 1100,60 1050,60 C1000,60 950,90 900,100 C850,90 800,60 750,60 C700,60 650,90 600,100 C550,90 500,60 450,60 C400,60 350,90 300,100 C250,90 200,60 150,60 C100,60 50,90 0,100 Z"/>
-        </svg>
-      </div>
+      <div class="mosque-deco"><svg viewBox="0 0 1200 120" preserveAspectRatio="none" style="width:100%;height:100%;fill:var(--primary);opacity:.15;"><path d="M0,120 L1200,120 L1200,100 C1150,90 1100,60 1050,60 C1000,60 950,90 900,100 C850,90 800,60 750,60 C700,60 650,90 600,100 C550,90 500,60 450,60 C400,60 350,90 300,100 C250,90 200,60 150,60 C100,60 50,90 0,100 Z"/></svg></div>
     </div>
-
-    <div class="grid grid-3" style="margin-top:-64px; margin-bottom:24px; position:relative; z-index:5;">
-      <div class="card" style="display:flex; align-items:center; gap:16px;">
+    <div style="margin-top:-58px;position:relative;z-index:5;margin-bottom:20px;">
+      <button class="what-now-btn" onclick="showWhatNow()">🤔 ماذا أفعل الآن؟</button>
+    </div>
+    <div id="whatNowResult" style="margin-bottom:16px;"></div>
+    <div class="grid grid-4" style="margin-bottom:20px;">
+      <div class="card" style="text-align:center;">
         <div class="ring-wrap">
-          <svg viewBox="0 0 160 160">
-            <defs>
-              <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="var(--primary)"/>
-                <stop offset="100%" stop-color="var(--primary-light)"/>
-              </linearGradient>
-            </defs>
-            <circle class="ring-bg" cx="80" cy="80" r="73"/>
-            <circle class="ring-fg" cx="80" cy="80" r="73" stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"/>
-          </svg>
-          <div class="ring-center">
-            <span class="ring-pct">${pct}%</span>
-            <span class="ring-label">إنجاز اليوم</span>
-          </div>
+          <svg viewBox="0 0 150 150"><defs><linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="var(--primary)"/><stop offset="100%" stop-color="var(--primary-light)"/></linearGradient></defs>
+          <circle class="ring-bg" cx="75" cy="75" r="70"/><circle class="ring-fg" cx="75" cy="75" r="70" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/></svg>
+          <div class="ring-center"><span class="ring-pct">${pct}%</span><span class="ring-label">عبادات اليوم</span></div>
         </div>
       </div>
-
-      <div class="card" style="display:flex; flex-direction:column; justify-content:center; text-align:center;">
-        <div style="font-size:14px; font-weight:700;" class="muted">الالتزام الحالي</div>
-        <div style="font-size:42px; font-weight:900; margin:6px 0; color:var(--accent);" class="font-amiri">
-          ${streak} <span class="streak-flame">${streak>0?'🔥':'❄️'}</span>
-        </div>
-        <div style="font-size:12.5px; font-weight:600;" class="muted">أيام متتالية من الفرائض كاملة</div>
+      <div class="card" style="text-align:center;display:flex;flex-direction:column;justify-content:center;">
+        <div style="font-size:40px;font-weight:900;color:var(--accent);">${streak}<span style="font-size:22px;">${streak>0?'🔥':'❄️'}</span></div>
+        <div class="muted" style="font-size:12px;font-weight:700;">أيام الالتزام</div>
       </div>
-
-      <div class="card" style="display:flex; flex-direction:column; justify-content:center;">
-        <div style="font-size:13px; font-weight:700; margin-bottom:10px;" class="muted">معدل الالتزام (آخر 7 أيام)</div>
-        <div class="chart-bars">
-          ${last7DaysPct().map(d=>`
-            <div class="chart-col">
-              <div class="chart-fill" style="height:${clamp(d.pct,4,100)}%" title="${d.pct}%"></div>
-              <span class="chart-lbl">${d.label}</span>
-            </div>
-          `).join('')}
-        </div>
+      <div class="card" style="text-align:center;display:flex;flex-direction:column;justify-content:center;">
+        <div style="font-size:24px;font-weight:900;color:var(--primary);">${goalsDone}/${goalsTotal}</div>
+        <div class="muted" style="font-size:12px;font-weight:700;margin-bottom:8px;">أهداف 2026</div>
+        <div class="bar-track"><div class="bar-fill gold" style="width:${goalsTotal?Math.round(goalsDone/goalsTotal*100):0}%"></div></div>
+      </div>
+      <div class="card" style="text-align:center;display:flex;flex-direction:column;justify-content:center;">
+        <div style="font-size:24px;font-weight:900;color:var(--success);">${todaySpend.toFixed(0)}<span style="font-size:13px;">ج.م</span></div>
+        <div class="muted" style="font-size:12px;font-weight:700;">مصروف اليوم</div>
       </div>
     </div>
-
+    <div class="grid grid-2" style="margin-bottom:20px;">
+      <div class="card">
+        <h3 class="section-title">🎭 كيف حالك اليوم؟</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">${moods.map(([em,lbl])=>`<button class="mood-btn ${todayMood===lbl?'selected':''}" style="flex:1;min-width:55px;" onclick="setMood('${lbl}')"><span class="mood-emoji">${em}</span>${lbl}</button>`).join('')}</div>
+        ${todayMood?`<div style="margin-top:10px;padding:10px;background:var(--primary-dim);border-radius:var(--radius-s);font-size:13px;font-weight:700;color:var(--primary);">حالتك اليوم: ${todayMood}</div>`:''}
+      </div>
+      <div class="card">
+        <h3 class="section-title">📊 معدل الالتزام (7 أيام)</h3>
+        <div class="chart-bars">${last7DaysPct().map(d=>`<div class="chart-col"><div class="chart-fill" style="height:${clamp(d.pct,4,100)}%"></div><span class="chart-lbl">${d.label}</span></div>`).join('')}</div>
+      </div>
+    </div>
     <div class="grid grid-2">
-      <div style="display:flex; flex-direction:column; gap:14px;">
-        ${HABIT_GROUPS.map(g=>`
-          <div class="card">
-            <h3 class="section-title" style="margin-bottom:12px; font-size:15px; color:var(--primary); display:flex; align-items:center; justify-content:between;">
-              <span>${g.title}</span>
-              ${g.obligatory?'<span class="pill" style="background:var(--primary-dim); color:var(--primary); font-size:10.5px;">تؤثر في الالتزام</span>':''}
-            </h3>
-            <div>
-              ${g.keys.map(([k,lbl])=>`
-                <div class="habit-row ${day[k]?'done':''}" onclick="toggleHabit('${k}')">
-                  <div class="chk">${day[k]?'✓':''}</div>
-                  <span class="label">${lbl}</span>
-                </div>
-              `).join('')}
-            </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        ${HABIT_GROUPS.map(g=>`<div class="card"><h3 class="section-title" style="font-size:15px;color:var(--primary);">${g.title}${g.obligatory?'<span class="pill" style="background:var(--primary-dim);color:var(--primary);font-size:10px;margin-right:8px;">تؤثر على الالتزام</span>':''}</h3>${g.keys.map(([k,lbl])=>`<div class="habit-row ${day[k]?'done':''}" onclick="toggleHabit('${k}')"><div class="chk">${day[k]?'✓':''}</div><span class="hl">${lbl}</span></div>`).join('')}</div>`).join('')}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="card"><h3 class="section-title">💡 مهام التركيز اليوم</h3><div id="homeFocusArea"></div></div>
+        <div class="card"><h3 class="section-title">📖 آخر ما حفظت</h3><div id="homeQuranArea"></div></div>
+        <div class="card"><h3 class="section-title">📈 لمحة التقدم</h3>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div><div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:700;margin-bottom:4px;"><span>🎓 الكورسات</span><span>${coursePct}%</span></div><div class="bar-track"><div class="bar-fill" style="width:${coursePct}%"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:700;margin-bottom:4px;"><span>🎯 الأهداف</span><span>${goalsTotal?Math.round(goalsDone/goalsTotal*100):0}%</span></div><div class="bar-track"><div class="bar-fill gold" style="width:${goalsTotal?Math.round(goalsDone/goalsTotal*100):0}%"></div></div></div>
           </div>
-        `).join('')}
-      </div>
-
-      <div style="display:flex; flex-direction:column; gap:14px;">
-        <div class="card">
-          <h3 class="section-title">💡 راداد التركيز اليومي</h3>
-          <div id="homeFocusArea"></div>
-        </div>
-        <div class="card">
-          <h3 class="section-title">📖 آخر ما قرأت</h3>
-          <div id="homeQuranArea"></div>
         </div>
       </div>
-    </div>
-  `;
-  renderHomeFocus();
-  renderHomeQuran();
+    </div>`;
+  renderHomeFocus();renderHomeQuran();
 }
-
-function renderHomeFocus(){
-  const area = $('#homeFocusArea');
-  if(!area) return;
-  const tk = todayKey();
-  const list = DB.focusTasks[tk] || [];
-  if(!list.length){
-    area.innerHTML = `<div class="muted" style="font-size:14px; padding:10px 0;">لا توجد مهام تركيز مضافة لليوم، يمكنك إضافتها من مركز التركيز.</div>
-    <button class="btn" style="width:100%; margin-top:6px;" onclick="navigate('focus')">🧠 اذهب لمركز التركيز</button>`;
-    return;
-  }
-  area.innerHTML = list.slice(0,3).map(t=>`
-    <div class="focus-task" style="border-radius:var(--radius-s); background:var(--bg-soft); margin-bottom:6px; font-size:14px;">
-      <span style="font-size:16px;">${t.done?'✅':'⏳'}</span>
-      <span style="flex:1; text-decoration:${t.done?'line-through':'none'}; opacity:${t.done?.6:1}">${esc(t.title)}</span>
-      <span class="pill">${t.pomoCount || 0} طماطم</span>
-    </div>
-  `).join('') + `<button class="btn btn-ghost" style="width:100%; font-size:13px; margin-top:4px;" onclick="navigate('focus')">عرض الكل</button>`;
+function setMood(mood){DB.mood[todayKey()]=mood;persist.mood();renderHome();showToast(`سجلت حالتك: ${mood}`,'🎭');}
+function renderHomeFocus(){const area=$('#homeFocusArea');if(!area)return;const list=DB.focusTasks[todayKey()]||[];if(!list.length){area.innerHTML=`<div class="muted" style="font-size:13.5px;padding:8px 0;">لا توجد مهام مضافة لليوم.</div><button class="btn btn-sm" style="margin-top:6px;" onclick="navigate('focus')">🧠 مركز التركيز</button>`;return;}area.innerHTML=list.slice(0,3).map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:var(--radius-s);background:var(--bg-soft);margin-bottom:6px;font-size:13.5px;"><span>${t.done?'✅':'⏳'}</span><span style="flex:1;text-decoration:${t.done?'line-through':'none'};opacity:${t.done?.6:1}">${esc(t.title)}</span><span class="pill" style="font-size:10.5px;">${t.pomoCount||0}🍅</span></div>`).join('')+`<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:4px;" onclick="navigate('focus')">عرض الكل</button>`;}
+function renderHomeQuran(){const area=$('#homeQuranArea');if(!area)return;const p=DB.quranProgress;const hasData=p.surah||(p.surahs&&Object.keys(p.surahs).length>0);if(!hasData){area.innerHTML=`<div class="muted" style="font-size:13.5px;padding:8px 0;">لم تسجل حفظًا بعد.</div><button class="btn btn-sm" style="margin-top:6px;" onclick="navigate('quran')">📖 ابدأ الحفظ</button>`;return;}const lastSurah=p.surah||Object.keys(p.surahs||{}).pop()||'';area.innerHTML=`<div style="background:var(--accent-soft);padding:12px;border-radius:var(--radius-s);border:1px solid var(--accent);"><div style="font-weight:800;font-size:15px;color:var(--accent);" class="font-amiri">سورة ${esc(lastSurah)}</div><div class="muted" style="font-size:13px;margin-top:4px;">الآية: ${p.aya||0}</div></div><button class="btn btn-sm" style="width:100%;margin-top:8px;" onclick="navigate('quran')">📖 تحديث التقدم</button>`;}
+function showWhatNow(){
+  const suggestions=[];const day=getDay(todayKey());
+  if(!day.fajr)suggestions.push({icon:'🌅',task:'صلّ الفجر الآن',time:'5 دقائق'});
+  if(!day.adhkarS)suggestions.push({icon:'📿',task:'أذكار الصباح',time:'10 دقائق'});
+  if(!day.quranWird)suggestions.push({icon:'📖',task:'اقرأ ورد القرآن اليومي',time:'20 دقيقة'});
+  const pendingCourse=DB.courses.find(c=>(c.completedHours||0)<(c.totalHours||1));
+  if(pendingCourse)suggestions.push({icon:'🎓',task:`أكمل: ${pendingCourse.title}`,time:'30 دقيقة'});
+  const pendingGoal=DB.goals2026.find(g=>!g.done);
+  if(pendingGoal)suggestions.push({icon:'🎯',task:`العمل على: ${pendingGoal.title}`,time:'45 دقيقة'});
+  if(!day.isha)suggestions.push({icon:'🌙',task:'صلّ العشاء',time:'5 دقائق'});
+  if(!day.adhkarM)suggestions.push({icon:'🌙',task:'أذكار المساء',time:'10 دقائق'});
+  const top=suggestions.slice(0,3);const result=$('#whatNowResult');if(!result)return;
+  if(!top.length){result.innerHTML=`<div class="card" style="text-align:center;padding:20px;background:var(--success-soft);border-color:var(--success);"><div style="font-size:32px;margin-bottom:8px;">🎉</div><div style="font-weight:800;color:var(--success);">ممتاز! أنجزت المهام الأساسية لليوم</div></div>`;return;}
+  result.innerHTML=`<div class="card"><h3 class="section-title" style="color:var(--primary);">🎯 ابدأ بهذا الآن:</h3>${top.map(s=>`<div class="suggestion-item"><span style="font-size:26px;">${s.icon}</span><div><div style="font-weight:800;font-size:15px;">${esc(s.task)}</div><div class="muted" style="font-size:12.5px;">⏱ ${s.time}</div></div></div>`).join('')}</div>`;
 }
-
-function renderHomeQuran(){
-  const area = $('#homeQuranArea');
-  if(!area) return;
-  const p = DB.quranProgress;
-  if(!p.surah){
-    area.innerHTML = `<div class="muted" style="font-size:14px; padding:10px 0;">لم تسجل أي تقدم في الحفظ بعد.</div>
-    <button class="btn" style="width:100%; margin-top:6px;" onclick="navigate('quran')">📖 ابدأ الحفظ الآن</button>`;
-    return;
-  }
-  area.innerHTML = `
-    <div style="background:var(--accent-soft); padding:14px; border-radius:var(--radius-m); border:1px solid var(--accent); margin-bottom:10px;">
-      <div style="font-weight:800; font-size:16px; color:var(--accent);" class="font-amiri">سورة ${esc(p.surah)}</div>
-      <div class="muted" style="font-size:13.5px; margin-top:4px;">وصلت إلى الآية: ${p.aya || 0}</div>
-      ${p.notes?`<div style="font-size:12.5px; margin-top:8px; border-top:1px dashed var(--border); padding-top:6px;" class="muted">ملاحظة: ${esc(p.notes)}</div>`:''}
+/* WORSHIP */
+function renderWorship(){
+  const w=$('#page-worship');const day=getDay(WORSHIP_DATE);const d=new Date(WORSHIP_DATE+'T12:00:00');
+  const pct=dayCompletionPct(day);const circ=2*Math.PI*55;const offset=circ-(pct/100)*circ;
+  const prayers=[['fajr','🌅 الفجر'],['dhuhr','☀️ الظهر'],['asr','🌤 العصر'],['maghrib','🌇 المغرب'],['isha','🌙 العشاء']];
+  const sunnahs=[['sFajr','سنة الفجر'],['sDhuhr','سنة الظهر'],['sMaghrib','سنة المغرب'],['sIsha','سنة العشاء']];
+  const extra=[['duha','الضحى'],['witr','الوتر'],['qiyam','قيام الليل']];
+  const adhkar=[['adhkarS','📿 أذكار الصباح'],['adhkarM','🌙 أذكار المساء'],['quranWird','📖 ورد الذكر']];
+  w.innerHTML=`
+    <div class="card" style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="btn btn-icon" onclick="shiftWorshipDate(-1)">➡️</button>
+        <div style="text-align:center;"><div style="font-weight:800;font-size:16px;">${gregorianStr(d)}</div><div class="muted" style="font-size:12px;">${hijriDate(d)}</div>${WORSHIP_DATE===todayKey()?'<span class="pill" style="background:var(--primary-dim);color:var(--primary);margin-top:4px;">اليوم</span>':''}</div>
+        <button class="btn btn-icon" onclick="shiftWorshipDate(1)" ${WORSHIP_DATE===todayKey()?'disabled style="opacity:.4;"':''}>⬅️</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div class="ring-wrap" style="width:120px;height:120px;">
+          <svg viewBox="0 0 130 130"><defs><linearGradient id="ringGrad2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="var(--primary)"/><stop offset="100%" stop-color="var(--primary-light)"/></linearGradient></defs>
+          <circle class="ring-bg" cx="65" cy="65" r="55"/><circle class="ring-fg" cx="65" cy="65" r="55" stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke="url(#ringGrad2)"/></svg>
+          <div class="ring-center"><span class="ring-pct" style="font-size:22px;">${pct}%</span></div>
+        </div>
+        <div><div style="font-weight:800;font-size:15px;">إنجاز اليوم</div><div class="muted" style="font-size:12px;margin-top:4px;">الفرائض + الأذكار</div>${allObligatoryDone(day)?'<div style="color:var(--success);font-weight:800;font-size:13px;margin-top:6px;">🌟 يوم مكتمل!</div>':''}</div>
+      </div>
     </div>
-    <button class="btn" style="width:100%;" onclick="navigate('quran')">📖 تحديث الورد المالي</button>
-  `;
+    <div class="grid grid-2">
+      <div>
+        <div class="card" style="margin-bottom:14px;"><h3 class="section-title" style="color:var(--primary);">🕌 الفرائض <span class="pill" style="background:var(--primary-dim);color:var(--primary);font-size:10px;">تؤثر على الالتزام</span></h3>${prayers.map(([k,lbl])=>`<div class="habit-row ${day[k]?'done':''}" onclick="toggleWorshipHabit('${k}')"><div class="chk">${day[k]?'✓':''}</div><span class="hl">${lbl}</span></div>`).join('')}</div>
+        <div class="card"><h3 class="section-title" style="color:var(--accent);">📿 الأذكار <span class="pill" style="background:var(--primary-dim);color:var(--primary);font-size:10px;">تؤثر على الالتزام</span></h3>${adhkar.map(([k,lbl])=>`<div class="habit-row ${day[k]?'done':''}" onclick="toggleWorshipHabit('${k}')"><div class="chk">${day[k]?'✓':''}</div><span class="hl">${lbl}</span></div>`).join('')}</div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:14px;"><h3 class="section-title">🌟 السنن الرواتب</h3>${sunnahs.map(([k,lbl])=>`<div class="habit-row ${day[k]?'done':''}" onclick="toggleWorshipHabit('${k}')"><div class="chk">${day[k]?'✓':''}</div><span class="hl">${lbl}</span></div>`).join('')}</div>
+        <div class="card"><h3 class="section-title">💫 عبادات إضافية</h3>${extra.map(([k,lbl])=>`<div class="habit-row ${day[k]?'done':''}" onclick="toggleWorshipHabit('${k}')"><div class="chk">${day[k]?'✓':''}</div><span class="hl">${lbl}</span></div>`).join('')}</div>
+      </div>
+    </div>`;
 }
+function shiftWorshipDate(dir){const d=new Date(WORSHIP_DATE+'T12:00:00');d.setDate(d.getDate()+dir);const nk=todayKey(d);if(nk>todayKey())return;WORSHIP_DATE=nk;renderWorship();}
+function toggleWorshipHabit(key){const day=getDay(WORSHIP_DATE);day[key]=!day[key];persist.prayerHistory();if(day[key]){randomMotivation();addXP(10);checkAchievements();if(WORSHIP_DATE===todayKey()&&OBLIGATORY.includes(key)&&allObligatoryDone(day))setTimeout(()=>celebrateFullScreen(),350);}renderWorship();if(CURRENT_PAGE==='home')renderHome();}
 
-/* ====================== QURAN PAGE ====================== */
+/* QURAN */
+const SURAHS=[{n:'الفاتحة',v:7},{n:'البقرة',v:286},{n:'آل عمران',v:200},{n:'النساء',v:176},{n:'المائدة',v:120},{n:'الأنعام',v:165},{n:'الأعراف',v:206},{n:'الأنفال',v:75},{n:'التوبة',v:129},{n:'يونس',v:109},{n:'هود',v:123},{n:'يوسف',v:111},{n:'الرعد',v:43},{n:'إبراهيم',v:52},{n:'الحجر',v:99},{n:'النحل',v:128},{n:'الإسراء',v:111},{n:'الكهف',v:110},{n:'مريم',v:98},{n:'طه',v:135},{n:'الأنبياء',v:112},{n:'الحج',v:78},{n:'المؤمنون',v:118},{n:'النور',v:64},{n:'الفرقان',v:77},{n:'الشعراء',v:227},{n:'النمل',v:93},{n:'القصص',v:88},{n:'العنكبوت',v:69},{n:'الروم',v:60},{n:'لقمان',v:34},{n:'السجدة',v:30},{n:'الأحزاب',v:73},{n:'سبأ',v:54},{n:'فاطر',v:45},{n:'يس',v:83},{n:'الصافات',v:182},{n:'ص',v:88},{n:'الزمر',v:75},{n:'غافر',v:85},{n:'فصلت',v:54},{n:'الشورى',v:53},{n:'الزخرف',v:89},{n:'الدخان',v:59},{n:'الجاثية',v:37},{n:'الأحقاف',v:35},{n:'محمد',v:38},{n:'الفتح',v:29},{n:'الحجرات',v:18},{n:'ق',v:45},{n:'الذاريات',v:60},{n:'الطور',v:49},{n:'النجم',v:62},{n:'القمر',v:55},{n:'الرحمن',v:78},{n:'الواقعة',v:96},{n:'الحديد',v:29},{n:'المجادلة',v:22},{n:'الحشر',v:24},{n:'الممتحنة',v:13},{n:'الصف',v:14},{n:'الجمعة',v:11},{n:'المنافقون',v:11},{n:'التغابن',v:18},{n:'الطلاق',v:12},{n:'التحريم',v:12},{n:'الملك',v:30},{n:'القلم',v:52},{n:'الحاقة',v:52},{n:'المعارج',v:44},{n:'نوح',v:28},{n:'الجن',v:28},{n:'المزمل',v:20},{n:'المدثر',v:56},{n:'القيامة',v:40},{n:'الإنسان',v:31},{n:'المرسلات',v:50},{n:'النبأ',v:40},{n:'النازعات',v:46},{n:'عبس',v:42},{n:'التكوير',v:29},{n:'الانفطار',v:19},{n:'المطففين',v:36},{n:'الانشقاق',v:25},{n:'البروج',v:22},{n:'الطارق',v:17},{n:'الأعلى',v:19},{n:'الغاشية',v:26},{n:'الفجر',v:30},{n:'البلد',v:20},{n:'الشمس',v:15},{n:'الليل',v:21},{n:'الضحى',v:11},{n:'الشرح',v:8},{n:'التين',v:8},{n:'العلق',v:19},{n:'القدر',v:5},{n:'البينة',v:8},{n:'الزلزلة',v:8},{n:'العاديات',v:11},{n:'القارعة',v:11},{n:'التكاثر',v:8},{n:'العصر',v:3},{n:'الهمزة',v:9},{n:'الفيل',v:5},{n:'قريش',v:4},{n:'الماعون',v:7},{n:'الكوثر',v:3},{n:'الكافرون',v:6},{n:'النصر',v:3},{n:'المسد',v:5},{n:'الإخلاص',v:4},{n:'الفلق',v:5},{n:'الناس',v:6}];
 function renderQuran(){
-  const q = $('#page-quran');
-  const p = DB.quranProgress;
-  q.innerHTML = `
-    <div class="card" style="max-width:520px; margin:20px auto;">
-      <h2 class="section-title" style="font-size:20px; color:var(--primary);" class="font-amiri">📖 متابعة ورد حفظ القرآن</h2>
-      <p class="muted" style="font-size:14px; margin-bottom:16px;">سجل آخر سورة وآية قمت بحفظها ومراجعتها لتتبع تقدمك المالي.</p>
-      <div class="field"><label>اسم السورة</label><input id="qSurah" value="${esc(p.surah)}" placeholder="مثال: البقرة"></div>
-      <div class="field"><label>رقم الآية</label><input id="qAya" type="number" value="${p.aya || ''}" placeholder="مثال: 105"></div>
-      <div class="field"><label>ملاحظات أو روابط مراجعة</label><textarea id="qNotes" placeholder="اكتب أي ملاحظة للحفظ هنا...">${esc(p.notes)}</textarea></div>
-      <button class="btn btn-primary" style="width:100%; margin-top:8px;" onclick="saveQuranProgress()">حفظ التقدم</button>
+  const q=$('#page-quran');
+  const totalV=SURAHS.reduce((a,s)=>a+s.v,0);
+  const memorized=SURAHS.reduce((a,s,i)=>{const sp=DB.quranProgress.surahs?.[i];return a+(sp&&sp.memorized?s.v:0);},0);
+  const reviewed=SURAHS.reduce((a,s,i)=>{const sp=DB.quranProgress.surahs?.[i];return a+(sp&&sp.reviewed?s.v:0);},0);
+  const memPct=Math.round(memorized/totalV*100);const revPct=Math.round(reviewed/totalV*100);
+  const memSurahs=Object.values(DB.quranProgress.surahs||{}).filter(s=>s.memorized).length;
+  q.innerHTML=`
+    <div class="grid grid-3" style="margin-bottom:20px;">
+      <div class="card" style="text-align:center;"><div style="font-size:28px;font-weight:900;color:var(--primary);">${memPct}%</div><div class="muted" style="font-size:12px;font-weight:700;margin-bottom:8px;">محفوظ</div><div class="bar-track"><div class="bar-fill" style="width:${memPct}%"></div></div></div>
+      <div class="card" style="text-align:center;"><div style="font-size:28px;font-weight:900;color:var(--accent);">${revPct}%</div><div class="muted" style="font-size:12px;font-weight:700;margin-bottom:8px;">مراجع ⭐</div><div class="bar-track"><div class="bar-fill gold" style="width:${revPct}%"></div></div></div>
+      <div class="card" style="text-align:center;"><div style="font-size:28px;font-weight:900;">${memSurahs}</div><div class="muted" style="font-size:12px;font-weight:700;">سورة محفوظة</div></div>
     </div>
-  `;
+    <div class="card" style="margin-bottom:16px;"><input type="text" placeholder="🔍 ابحث عن سورة..." oninput="quranSearchQuery=this.value;renderQuranList()" value="${esc(quranSearchQuery)}"></div>
+    <div id="quranSurahList"></div>`;
+  renderQuranList();
 }
-function saveQuranProgress(){
-  DB.quranProgress = {
-    surah: $('#qSurah').value.trim(),
-    aya: parseInt($('#qAya').value,10) || 0,
-    notes: $('#qNotes').value.trim(),
-    updatedAt: new Date().toISOString()
-  };
-  persist.quranProgress();
-  showToast('تم حفظ تقدمك في القرآن الكريم','📖');
-  checkAchievements();
+function renderQuranList(){
+  const list=$('#quranSurahList');if(!list)return;
+  const filtered=SURAHS.map((s,i)=>({...s,i})).filter(s=>s.n.includes(quranSearchQuery)||quranSearchQuery==='');
+  list.innerHTML=`<div class="grid grid-3">${filtered.map(({n,v,i})=>{const sp=DB.quranProgress.surahs?.[i]||{};const mem=sp.memorized;const rev=sp.reviewed;return `<div class="card card-hover" style="${mem?'border-color:var(--success);background:var(--success-soft)':''}${rev&&!mem?'border-color:var(--accent);':''}cursor:pointer;" onclick="openQuranSurahModal(${i})"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;"><span class="pill" style="font-size:10.5px;">${i+1}</span><div style="font-size:16px;">${mem&&rev?'⭐':mem?'📗':rev?'📘':''}</div></div><div style="font-weight:800;font-size:16px;margin-bottom:2px;" class="font-amiri">${n}</div><div class="muted" style="font-size:12px;">${v} آية</div>${mem?`<div style="font-size:11px;color:var(--success);font-weight:700;margin-top:4px;">من ${sp.fromVerse||1} إلى ${sp.toVerse||v}</div>`:''}</div>`;}).join('')}</div>`;
 }
-
-/* ====================== BOOKS PAGE ====================== */
-function renderBooks(){
-  const b = $('#page-books');
-  if(!DB.books.length){
-    b.innerHTML = `<div class="empty-state"><div class="ic">📚</div><p>لم تضف أي كتب لمكتبتك بعد.</p></div>`;
-    return;
-  }
-  b.innerHTML = `<div class="grid grid-3">${DB.books.map((x,i)=>`
-    <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
-      <div>
-        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:6px;">
-          <h3 style="margin:0 0 4px 0; font-size:16px; font-weight:800;">${esc(x.title)}</h3>
-          <button class="btn btn-icon btn-ghost" style="width:28px; height:28px; font-size:12px; color:var(--danger);" onclick="deleteBook('${x.id}')">✕</button>
-        </div>
-        <div class="muted" style="font-size:13px; margin-bottom:10px;">تأليف: ${esc(x.author || 'غير معروف')}</div>
-        <div style="font-size:20px; margin-bottom:12px;">${'★'.repeat(x.rating || 0)}${'☆'.repeat(5-(x.rating||0))}</div>
-      </div>
-      <div>
-        <div style="font-size:13px; display:flex; justify-content:space-between; margin-bottom:6px;" class="muted">
-          <span>التقدم: ${x.progress || 0} من ${x.pages || 0} صفحة</span>
-          <span>${Math.round(((x.progress||0)/(x.pages||1))*100)}%</span>
-        </div>
-        <div class="bar-track"><div class="bar-fill" style="width:${((x.progress||0)/(x.pages||1))*100}%"></div></div>
-        <button class="btn" style="width:100%; margin-top:12px; font-size:12.5px; padding:6px 12px;" onclick="openUpdateBookProgressModal('${x.id}')">تحديث التقدم</button>
-      </div>
-    </div>
-  `).join('')}</div>`;
-}
-function openBookModal(){
+function openQuranSurahModal(idx){
+  const s=SURAHS[idx];const sp=DB.quranProgress.surahs?.[idx]||{};
   openModal(`
-    <div class="modal-head"><h3>إضافة كتاب جديد</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field"><label>عنوان الكتاب</label><input id="bTitle"></div>
-    <div class="field"><label>المؤلف</label><input id="bAuthor"></div>
-    <div class="grid grid-2">
-      <div class="field"><label>إجمالي الصفحات</label><input id="bPages" type="number"></div>
-      <div class="field"><label>الصفحة الحالية</label><input id="bProg" type="number" value="0"></div>
+    <div class="modal-head"><h3 class="font-amiri">${s.n} (${s.v} آية)</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
+    <div class="field"><label>من آية</label><input id="qFromV" type="number" min="1" max="${s.v}" value="${sp.fromVerse||1}"></div>
+    <div class="field"><label>إلى آية</label><input id="qToV" type="number" min="1" max="${s.v}" value="${sp.toVerse||s.v}"></div>
+    <div class="field"><label>ملاحظات</label><textarea id="qNotes" style="height:60px;">${esc(sp.notes||'')}</textarea></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <button class="btn ${sp.memorized?'btn-primary':''}" style="flex:1" onclick="setQuranStatus(${idx},'memorized',${!sp.memorized})">📗 ${sp.memorized?'محفوظ ✓':'حفظت هذا'}</button>
+      <button class="btn ${sp.reviewed?'btn-primary':''}" style="flex:1" onclick="setQuranStatus(${idx},'reviewed',${!sp.reviewed})">⭐ ${sp.reviewed?'مراجعة ✓':'راجعت هذا'}</button>
     </div>
-    <div class="field"><label>تقييمك</label><div class="star-row" id="modalStars">${[1,2,3,4,5].map(n=>`<span class="star" onclick="setModalStars(${n})">★</span>`).join('')}</div></div>
-    <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="saveBook()">إضافة للمكتبة</button>
-  `);
-  window._modalRating = 0;
-}
-function setModalStars(n){
-  window._modalRating = n;
-  $$('#modalStars .star').forEach((el,i)=>el.classList.toggle('on', i<n));
-}
-function saveBook(){
-  const title = $('#bTitle').value.trim();
-  if(!title) return;
-  DB.books.push({
-    id: uid(), title, author: $('#bAuthor').value.trim(),
-    pages: parseInt($('#bPages').value,10)||100, progress: parseInt($('#bProg').value,10)||0,
-    rating: window._modalRating||0
-  });
-  persist.books(); closeModal(); renderBooks(); showToast('تمت إضافة الكتاب للمكتبة','📚');
-}
-function deleteBook(id){
-  if(!confirm('هل متأكد من حذف هذا الكتاب؟')) return;
-  DB.books = DB.books.filter(x=>x.id!==id);
-  persist.books(); renderBooks();
-}
-function openUpdateBookProgressModal(id){
-  const b = DB.books.find(x=>x.id===id); if(!b) return;
-  openModal(`
-    <div class="modal-head"><h3>تحديث تقدم: ${esc(b.title)}</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field"><label>الصفحة الحالية (من ${b.pages})</label><input id="buProg" type="number" value="${b.progress}"></div>
-    <button class="btn btn-primary" style="width:100%;" onclick="saveBookProgress('${id}')">تحديث</button>
+    <button class="btn btn-primary" style="width:100%;" onclick="saveQuranSurah(${idx})">حفظ</button>
   `);
 }
-function saveBookProgress(id){
-  const b = DB.books.find(x=>x.id===id); if(!b) return;
-  b.progress = clamp(parseInt($('#buProg').value,10)||0, 0, b.pages);
-  persist.books(); closeModal(); renderBooks(); showToast('تم تحديث تقدم القراءة','📚');
-  checkAchievements();
-}
+function setQuranStatus(idx,field,val){if(!DB.quranProgress.surahs)DB.quranProgress.surahs={};if(!DB.quranProgress.surahs[idx])DB.quranProgress.surahs[idx]={};DB.quranProgress.surahs[idx][field]=val;DB.quranProgress.updatedAt=new Date().toISOString();persist.quranProgress();closeModal();renderQuran();if(val)showToast(field==='reviewed'?'أحسنت! المراجعة تمت ⭐':'ما شاء الله، الحفظ سُجِّل 📗',field==='reviewed'?'⭐':'📗');checkAchievements();addXP(val?20:0);}
+function saveQuranSurah(idx){if(!DB.quranProgress.surahs)DB.quranProgress.surahs={};if(!DB.quranProgress.surahs[idx])DB.quranProgress.surahs[idx]={};const sp=DB.quranProgress.surahs[idx];sp.fromVerse=parseInt($('#qFromV').value)||1;sp.toVerse=parseInt($('#qToV').value)||SURAHS[idx].v;sp.notes=$('#qNotes').value.trim();DB.quranProgress.surah=SURAHS[idx].n;DB.quranProgress.aya=sp.toVerse;DB.quranProgress.updatedAt=new Date().toISOString();persist.quranProgress();closeModal();renderQuran();showToast('تم حفظ التقدم في القرآن','📖');}
+/* BOOKS */
+function renderBooks(){const b=$('#page-books');if(!DB.books.length){b.innerHTML=`<div class="empty-state"><div class="eic">📚</div><p>مكتبتك فارغة.</p><button class="btn btn-primary" onclick="openBookModal()">+ إضافة كتاب</button></div>`;return;}b.innerHTML=`<div class="grid grid-3">${DB.books.map(x=>`<div class="card card-hover"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;"><span class="pill" style="font-size:10.5px;">${esc(x.genre||'كتاب')}</span><button class="btn btn-icon btn-ghost" style="width:28px;height:28px;color:var(--danger);font-size:12px;" onclick="deleteBook('${x.id}')">✕</button></div><h3 style="margin:0 0 4px;font-size:15px;font-weight:800;">${esc(x.title)}</h3><div class="muted" style="font-size:13px;margin-bottom:10px;">${esc(x.author||'')}</div><div style="font-size:18px;margin-bottom:10px;">${'★'.repeat(x.rating||0)}${'☆'.repeat(5-(x.rating||0))}</div><div style="font-size:12px;display:flex;justify-content:space-between;margin-bottom:5px;" class="muted"><span>${x.progress||0} / ${x.pages||0} صفحة</span><span>${Math.round(((x.progress||0)/(x.pages||1))*100)}%</span></div><div class="bar-track"><div class="bar-fill" style="width:${((x.progress||0)/(x.pages||1))*100}%"></div></div><div style="display:flex;gap:6px;margin-top:12px;"><button class="btn btn-sm" style="flex:1;" onclick="openUpdateBookModal('${x.id}')">تحديث</button>${x.link?`<button class="btn btn-sm btn-primary" onclick="window.open('${esc(x.link)}','_blank')">فتح</button>`:''}</div></div>`).join('')}</div>`;}
+function openBookModal(){openModal(`<div class="modal-head"><h3>📚 إضافة كتاب</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div><div class="field"><label>عنوان الكتاب</label><input id="bTitle"></div><div class="field"><label>المؤلف</label><input id="bAuthor"></div><div class="grid grid-2"><div class="field"><label>الصفحات الكلية</label><input id="bPages" type="number" value="200"></div><div class="field"><label>الصفحة الحالية</label><input id="bProg" type="number" value="0"></div></div><div class="field"><label>التصنيف</label><select id="bGenre"><option>دين وروحانيات</option><option>تطوير ذاتي</option><option>علوم وتقنية</option><option>رواية</option><option>تاريخ</option><option>فلسفة</option><option>أخرى</option></select></div><div class="field"><label>رابط الكتاب (اختياري)</label><input id="bLink" placeholder="https://..."></div><div class="field"><label>تقييمك</label><div class="star-row" id="modalStars">${[1,2,3,4,5].map(n=>`<span class="star" onclick="setModalStars(${n})">★</span>`).join('')}</div></div><button class="btn btn-primary" style="width:100%;margin-top:10px;" onclick="saveBook()">إضافة للمكتبة</button>`);window._modalRating=0;}
+function setModalStars(n){window._modalRating=n;$$('#modalStars .star').forEach((el,i)=>el.classList.toggle('on',i<n));}
+function saveBook(){const title=$('#bTitle').value.trim();if(!title)return;DB.books.push({id:uid(),title,author:$('#bAuthor').value.trim(),pages:parseInt($('#bPages').value)||200,progress:parseInt($('#bProg').value)||0,rating:window._modalRating||0,genre:$('#bGenre').value,link:$('#bLink').value.trim()});persist.books();closeModal();renderBooks();showToast('تمت إضافة الكتاب','📚');}
+function deleteBook(id){if(!confirm('حذف هذا الكتاب؟'))return;DB.books=DB.books.filter(x=>x.id!==id);persist.books();renderBooks();}
+function openUpdateBookModal(id){const b=DB.books.find(x=>x.id===id);if(!b)return;openModal(`<div class="modal-head"><h3>تحديث: ${esc(b.title)}</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div><div class="field"><label>الصفحة الحالية (من ${b.pages})</label><input id="buProg" type="number" value="${b.progress}"></div><button class="btn btn-primary" style="width:100%;" onclick="saveBookProgress('${id}')">تحديث</button>`);}
+function saveBookProgress(id){const b=DB.books.find(x=>x.id===id);if(!b)return;b.progress=clamp(parseInt($('#buProg').value)||0,0,b.pages);persist.books();closeModal();renderBooks();showToast('تم تحديث التقدم','📚');checkAchievements();addXP(15);}
 
-/* ====================== JOURNAL PAGE ====================== */
+/* JOURNAL */
 function renderJournal(){
-  const j = $('#page-journal');
-  if(!DB.journal.length){
-    j.innerHTML = `<div class="empty-state"><div class="ic">✍️</div><p>لم تكتب أي خواطر أو يوميات بعد.</p></div>`;
-    return;
-  }
-  j.innerHTML = `<div style="max-width:700px; margin:0 auto; display:flex; flex-direction:column; gap:14px;">${DB.journal.map(x=>`
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-        <div style="font-size:13px; font-weight:700;" class="muted">${esc(x.date)}</div>
-        <button class="btn btn-icon btn-ghost" style="width:28px; height:28px; color:var(--danger);" onclick="deleteJournal('${x.id}')">✕</button>
-      </div>
-      <div style="font-size:15px; line-height:1.6; white-space:pre-wrap;">${esc(x.content)}</div>
-    </div>
-  `).join('')}</div>`;
+  const j=$('#page-journal');
+  j.innerHTML=`<div class="card" style="margin-bottom:20px;"><h3 class="section-title">⚡ كتابة سريعة</h3><textarea id="quickDump" style="height:100px;" placeholder="اكتب أي فكرة بحرية... 🧠"></textarea><button class="btn btn-primary" style="margin-top:10px;" onclick="saveQuickDump()">حفظ الفكرة</button></div>${!DB.journal.length?`<div class="empty-state"><div class="eic">✍️</div><p>لم تكتب بعد.</p></div>`:`<div style="max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:12px;">${DB.journal.map(x=>`<div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">${x.title?`<div><div style="font-weight:800;font-size:15px;">${esc(x.title)}</div><div style="font-size:12px;" class="muted">${esc(x.date)}</div></div>`:`<div style="font-size:12px;font-weight:700;" class="muted">${esc(x.date)}</div>`}<button class="btn btn-icon btn-ghost" style="width:28px;height:28px;color:var(--danger);font-size:11px;" onclick="deleteJournal('${x.id}')">✕</button></div><div style="font-size:14.5px;line-height:1.7;white-space:pre-wrap;">${esc(x.content)}</div></div>`).join('')}</div>`}`;
 }
-function openJournalModal(){
-  openModal(`
-    <div class="modal-head"><h3>كتابة خاطرة / يوميات</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field"><label>تاريخ اليوم</label><input id="jDate" value="${gregorianStr()}"></div>
-    <div class="field"><label>ماذا يدور في ذهنك؟ (يمكنك استخدام الاختصار Ctrl + S للحفظ الذكي الفوري)</label><textarea id="jContent" style="height:140px;" placeholder="اكتب بحرية..."></textarea></div>
-    <button class="btn btn-primary" style="width:100%;" onclick="saveJournal()">تدوين</button>
-  `);
-}
-function saveJournal(){
-  const content = $('#jContent').value.trim();
-  if(!content) return;
-  DB.journal.unshift({ id: uid(), date: $('#jDate').value.trim(), content });
-  persist.journal(); closeModal(); renderJournal(); showToast('تم التدوين بنجاح','✍️');
-}
-function deleteJournal(id){
-  if(!confirm('هل تريد حذف هذه الخاطرة؟')) return;
-  DB.journal = DB.journal.filter(x=>x.id!==id);
-  persist.journal(); renderJournal();
-}
+function saveQuickDump(){const content=$('#quickDump').value.trim();if(!content)return;DB.journal.unshift({id:uid(),date:gregorianStr(),content,type:'quick'});persist.journal();renderJournal();showToast('تم تدوين الفكرة','✍️');addXP(5);}
+function openJournalModal(){openModal(`<div class="modal-head"><h3>✍️ يوميات</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div><div class="field"><label>العنوان (اختياري)</label><input id="jTitle" placeholder="عنوان..."></div><div class="field"><label>التاريخ</label><input id="jDate" value="${gregorianStr()}"></div><div class="field"><label>المحتوى</label><textarea id="jContent" style="height:150px;" placeholder="اكتب بحرية..."></textarea></div><button class="btn btn-primary" style="width:100%;" onclick="saveJournal()">تدوين</button>`);}
+function saveJournal(){const content=$('#jContent').value.trim();if(!content)return;DB.journal.unshift({id:uid(),title:$('#jTitle').value.trim(),date:$('#jDate').value.trim(),content});persist.journal();closeModal();renderJournal();showToast('تم التدوين','✍️');addXP(10);}
+function deleteJournal(id){if(!confirm('حذف هذه الخاطرة؟'))return;DB.journal=DB.journal.filter(x=>x.id!==id);persist.journal();renderJournal();}
 
-/* ====================== COURSES PAGE ====================== */
-function renderCourses(){
-  const c = $('#page-courses');
-  
-  // بناء الواجهة مع شريط البحث والتصفية المطورين
-  c.innerHTML = `
-    <div class="card" style="margin-bottom:20px;">
-      <div class="grid grid-2" style="gap:10px;">
-        <input type="text" id="courseSearchInput" placeholder="🔍 ابحث عن اسم كورس أو مهارة..." oninput="filterCoursesList()">
-        <select id="courseCategoryFilter" onchange="filterCoursesList()">
-          <option value="all">📁 كل التصنيفات</option>
-          <option value="برمجة">💻 برمجة وتطوير</option>
-          <option value="علم نفس">🧠 علم نفس وتطوير ذاتي</option>
-          <option value="لغات">🗣️ لغات وثقافة</option>
-          <option value="أخرى">✨ تصنيفات أخرى</option>
-        </select>
-      </div>
-    </div>
-    <div id="coursesItemsGrid"></div>
-  `;
-  
-  filterCoursesList();
-}
+/* COURSES */
+function renderCourses(){const c=$('#page-courses');c.innerHTML=`<div class="card" style="margin-bottom:18px;"><input type="text" id="courseSearch" placeholder="🔍 ابحث عن كورس..." oninput="filterCourses()"></div><div id="coursesGrid"></div>`;filterCourses();}
+function filterCourses(){const grid=$('#coursesGrid');if(!grid)return;const q=$('#courseSearch')?.value.toLowerCase()||'';const filtered=DB.courses.filter(x=>x.title.toLowerCase().includes(q)||(x.platform||'').toLowerCase().includes(q));if(!filtered.length){grid.innerHTML=`<div class="empty-state"><div class="eic">🎓</div><p>لا توجد كورسات.</p><button class="btn btn-primary" onclick="openCourseModal()">+ إضافة كورس</button></div>`;return;}grid.innerHTML=`<div class="grid grid-3">${filtered.map(x=>`<div class="card card-hover"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span class="pill" style="font-size:10.5px;">${esc(x.category||'عام')}</span><button class="btn btn-icon btn-ghost" style="width:26px;height:26px;color:var(--danger);font-size:11px;" onclick="deleteCourse('${x.id}')">✕</button></div><h3 style="margin:0 0 4px;font-size:15px;font-weight:800;">${esc(x.title)}</h3><div class="muted" style="font-size:12.5px;margin-bottom:12px;">${esc(x.platform||'')}</div><div style="font-size:12px;display:flex;justify-content:space-between;margin-bottom:5px;" class="muted"><span>${x.completedHours||0} / ${x.totalHours||0} ساعة</span><span>${Math.round(((x.completedHours||0)/(x.totalHours||1))*100)}%</span></div><div class="bar-track"><div class="bar-fill" style="width:${((x.completedHours||0)/(x.totalHours||1))*100}%"></div></div><button class="btn btn-sm" style="width:100%;margin-top:10px;" onclick="openUpdateCourseModal('${x.id}')">تحديث الساعات</button></div>`).join('')}</div>`;}
+function openCourseModal(){openModal(`<div class="modal-head"><h3>🎓 إضافة كورس</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div><div class="field"><label>اسم الكورس</label><input id="cTitle"></div><div class="field"><label>المنصة / المعلم</label><input id="cPlatform"></div><div class="field"><label>التصنيف</label><select id="cCategory"><option value="برمجة">💻 برمجة</option><option value="لغات">🗣️ لغات</option><option value="علم نفس">🧠 علم نفس</option><option value="دين">🕌 دين</option><option value="أخرى">✨ أخرى</option></select></div><div class="grid grid-2"><div class="field"><label>إجمالي الساعات</label><input id="cTotal" type="number" value="10"></div><div class="field"><label>المكتملة</label><input id="cDone" type="number" value="0"></div></div><button class="btn btn-primary" style="width:100%;" onclick="saveCourse()">إضافة</button>`);}
+function saveCourse(){const title=$('#cTitle').value.trim();if(!title)return;DB.courses.push({id:uid(),title,platform:$('#cPlatform').value.trim(),category:$('#cCategory').value,totalHours:parseFloat($('#cTotal').value)||10,completedHours:parseFloat($('#cDone').value)||0});persist.courses();closeModal();renderCourses();showToast('تمت إضافة الكورس','🎓');}
+function deleteCourse(id){if(!confirm('حذف هذا الكورس؟'))return;DB.courses=DB.courses.filter(x=>x.id!==id);persist.courses();renderCourses();}
+function openUpdateCourseModal(id){const c=DB.courses.find(x=>x.id===id);if(!c)return;openModal(`<div class="modal-head"><h3>${esc(c.title)}</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div><div class="field"><label>الساعات المكتملة (من ${c.totalHours})</label><input id="cuHours" type="number" step="0.1" value="${c.completedHours}"></div><button class="btn btn-primary" style="width:100%;" onclick="saveCourseProgress('${id}')">تحديث</button>`);}
+function saveCourseProgress(id){const c=DB.courses.find(x=>x.id===id);if(!c)return;c.completedHours=clamp(parseFloat($('#cuHours').value)||0,0,c.totalHours);c.updatedAt=new Date().toISOString();persist.courses();closeModal();renderCourses();showToast('تم تحديث التقدم','🎓');checkAchievements();addXP(15);}
 
-function filterCoursesList(){
-  const grid = $('#coursesItemsGrid');
-  if(!grid) return;
-  
-  const query = $('#courseSearchInput')?.value.toLowerCase().trim() || '';
-  const cat = $('#courseCategoryFilter')?.value || 'all';
-  
-  const filtered = DB.courses.filter(x => {
-    const matchesSearch = x.title.toLowerCase().includes(query) || (x.platform && x.platform.toLowerCase().includes(query));
-    const matchesCat = (cat === 'all') || (x.category === cat);
-    return matchesSearch && matchesCat;
-  });
+/* LESSONS */
+function renderLessons(){const l=$('#page-lessons');if(!DB.lessons.length){l.innerHTML=`<div class="empty-state"><div class="eic">🕌</div><p>لم تسجل أي دروس بعد.</p><button class="btn btn-primary" onclick="openLessonModal()">+ إضافة درس</button></div>`;return;}l.innerHTML=`<div class="grid grid-2">${DB.lessons.map(x=>`<div class="card" style="border-inline-start:4px solid var(--accent);"><div style="display:flex;justify-content:space-between;align-items:flex-start;"><span class="pill" style="background:var(--accent-soft);color:var(--accent);font-size:11px;">${esc(x.type||'علم شرعي')}</span><button class="btn btn-icon btn-ghost" style="width:26px;height:26px;color:var(--danger);font-size:11px;" onclick="deleteLesson('${x.id}')">✕</button></div><h3 style="margin:8px 0 4px;font-size:15px;font-weight:800;" class="font-amiri">${esc(x.title)}</h3><div class="muted" style="font-size:13px;margin-bottom:8px;">${esc(x.sheikh||'')}</div>${x.notes?`<div style="font-size:13px;background:var(--bg-soft);padding:8px 12px;border-radius:var(--radius-s);line-height:1.5;white-space:pre-wrap;" class="muted">${esc(x.notes)}</div>`:''}</div>`).join('')}</div>`;}
+function openLessonModal(){openModal(`<div class="modal-head"><h3>🕌 تسجيل درس ديني</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div><div class="field"><label>عنوان الدرس</label><input id="lTitle"></div><div class="field"><label>الشيخ / المحاضر</label><input id="lSheikh"></div><div class="field"><label>العلم</label><select id="lType"><option value="عقيدة">💎 عقيدة</option><option value="حديث">📜 حديث</option><option value="فقه">⚖️ فقه</option><option value="تزكية">🌱 تزكية</option><option value="سيرة">📚 سيرة</option></select></div><div class="field"><label>الفوائد</label><textarea id="lNotes" style="height:90px;" placeholder="اكتب الفوائد..."></textarea></div><button class="btn btn-primary" style="width:100%;" onclick="saveLesson()">حفظ الدرس</button>`);}
+function saveLesson(){const title=$('#lTitle').value.trim();if(!title)return;DB.lessons.unshift({id:uid(),title,sheikh:$('#lSheikh').value.trim(),type:$('#lType').value,notes:$('#lNotes').value.trim()});persist.lessons();closeModal();renderLessons();showToast('تم حفظ الدرس','🕌');checkAchievements();addXP(15);}
+function deleteLesson(id){if(!confirm('حذف؟'))return;DB.lessons=DB.lessons.filter(x=>x.id!==id);persist.lessons();renderLessons();}
 
-  if(!filtered.length){
-    grid.innerHTML = `<div class="empty-state"><div class="ic">🎓</div><p>لا توجد كورسات مطابقة للبحث الحالي.</p></div>`;
-    return;
-  }
-
-  grid.innerHTML = `<div class="grid grid-3">${filtered.map(x=>`
-    <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
-      <div>
-        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:6px;">
-          <span class="pill" style="background:var(--primary-dim); color:var(--primary); font-size:11px;">${esc(x.category || 'عام')}</span>
-          <button class="btn btn-icon btn-ghost" style="width:28px; height:28px; color:var(--danger);" onclick="deleteCourse('${x.id}')">✕</button>
-        </div>
-        <h3 style="margin:10px 0 4px 0; font-size:16px; font-weight:800;">${esc(x.title)}</h3>
-        <div class="muted" style="font-size:13px; margin-bottom:12px;">المنصة: ${esc(x.platform || 'غير محددة')}</div>
-      </div>
-      <div>
-        <div style="font-size:12.5px; display:flex; justify-content:space-between; margin-bottom:6px;" class="muted">
-          <span>التقدم: ${x.completedHours || 0} من ${x.totalHours || 0} ساعة</span>
-          <span>${Math.round(((x.completedHours||0)/(x.totalHours||1))*100)}%</span>
-        </div>
-        <div class="bar-track"><div class="bar-fill" style="width:${((x.completedHours||0)/(x.totalHours||1))*100}%"></div></div>
-        <button class="btn" style="width:100%; margin-top:12px; font-size:12.5px; padding:6px 12px;" onclick="openUpdateCourseModal('${x.id}')">تحديث الساعات</button>
-      </div>
-    </div>
-  `).join('')}</div>`;
-}
-
-function openCourseModal(){
-  openModal(`
-    <div class="modal-head"><h3>إضافة كورس جديد</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field"><label>اسم الكورس / المهارة</label><input id="cTitle"></div>
-    <div class="field"><label>المنصة / المعلم</label><input id="cPlatform"></div>
-    <div class="field">
-      <label>التصنيف</label>
-      <select id="cCategory">
-        <option value="برمجة">💻 برمجة وتطوير</option>
-        <option value="علم نفس">🧠 علم نفس وتطوير ذاتي</option>
-        <option value="لغات">🗣️ لغات وثقافة</option>
-        <option value="أخرى">✨ أخرى</option>
-      </select>
-    </div>
-    <div class="grid grid-2">
-      <div class="field"><label>إجمالي الساعات</label><input id="cTotal" type="number"></div>
-      <div class="field"><label>الساعات المكتملة</label><input id="cDone" type="number" value="0"></div>
-    </div>
-    <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="saveCourse()">إضافة الكورس</button>
-  `);
-}
-function saveCourse(){
-  const title = $('#cTitle').value.trim();
-  if(!title) return;
-  DB.courses.push({
-    id: uid(), title, platform: $('#cPlatform').value.trim(),
-    category: $('#cCategory').value,
-    totalHours: parseFloat($('#cTotal').value)||10, completedHours: parseFloat($('#cDone').value)||0
-  });
-  persist.courses(); closeModal(); renderCourses(); showToast('تم إضافة الكورس بنجاح','🎓');
-}
-function deleteCourse(id){
-  if(!confirm('هل تريد حذف هذا الكورس؟')) return;
-  DB.courses = DB.courses.filter(x=>x.id!==id);
-  persist.courses(); renderCourses();
-}
-function openUpdateCourseModal(id){
-  const c = DB.courses.find(x=>x.id===id); if(!c) return;
-  openModal(`
-    <div class="modal-head"><h3>تحديث ساعات كورس: ${esc(c.title)}</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field"><label>الساعات المكتملة حالياً (من ${c.totalHours})</label><input id="cuHours" type="number" step="0.1" value="${c.completedHours}"></div>
-    <button class="btn btn-primary" style="width:100%;" onclick="saveCourseProgress('${id}')">تحديث</button>
-  `);
-}
-function saveCourseProgress(id){
-  const c = DB.courses.find(x=>x.id===id); if(!c) return;
-  c.completedHours = clamp(parseFloat($('#cuHours').value)||0, 0, c.totalHours);
-  persist.courses(); closeModal(); renderCourses(); showToast('تم تحديث الساعات المكتملة','🎓');
-  checkAchievements();
-}
-
-/* ====================== LESSONS PAGE ====================== */
-function renderLessons(){
-  const l = $('#page-lessons');
-  
-  // بناء الواجهة مع تصفية ذكية متقدمة للدروس الشرعية والدينية
-  l.innerHTML = `
-    <div class="card" style="margin-bottom:20px;">
-      <div class="grid grid-2" style="gap:10px;">
-        <input type="text" id="lessonSearchInput" placeholder="🔍 ابحث عن عنوان درس أو شيخ..." oninput="filterLessonsList()">
-        <select id="lessonCategoryFilter" onchange="filterLessonsList()">
-          <option value="all">🕌 كل العلوم</option>
-          <option value="عقيدة">💎 عقيدة</option>
-          <option value="حديث">📜 حديث</option>
-          <option value="فقه">⚖️ فقه وسيرة</option>
-          <option value="تزكية">🌱 تزكية ورقائق</option>
-        </select>
-      </div>
-    </div>
-    <div id="lessonsItemsGrid"></div>
-  `;
-  
-  filterLessonsList();
-}
-
-function filterLessonsList(){
-  const grid = $('#lessonsItemsGrid');
-  if(!grid) return;
-  
-  const query = $('#lessonSearchInput')?.value.toLowerCase().trim() || '';
-  const type = $('#lessonCategoryFilter')?.value || 'all';
-  
-  const filtered = DB.lessons.filter(x => {
-    const matchesSearch = x.title.toLowerCase().includes(query) || (x.sheikh && x.sheikh.toLowerCase().includes(query));
-    const matchesType = (type === 'all') || (x.type === type);
-    return matchesSearch && matchesType;
-  });
-
-  if(!filtered.length){
-    grid.innerHTML = `<div class="empty-state"><div class="ic">🕌</div><p>لا توجد دروس دينية تطابق البحث الحالي.</p></div>`;
-    return;
-  }
-
-  grid.innerHTML = `<div class="grid grid-2">${filtered.map(x=>`
-    <div class="card" style="border-inline-start:4px solid var(--accent);">
-      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-        <span class="pill" style="background:var(--accent-soft); color:var(--accent); font-size:11px;">${esc(x.type || 'علم شرعي')}</span>
-        <button class="btn btn-icon btn-ghost" style="width:28px; height:28px; color:var(--danger);" onclick="deleteLesson('${x.id}')">✕</button>
-      </div>
-      <h3 style="margin:8px 0 4px 0; font-size:16px; font-weight:800;" class="font-amiri">${esc(x.title)}</h3>
-      <div class="muted" style="font-size:13.5px; margin-bottom:8px;">الشيخ/المحاضر: ${esc(x.sheikh || 'غير محدد')}</div>
-      ${x.notes?`<div style="font-size:13px; background:var(--bg-soft); padding:8px 12px; border-radius:var(--radius-s); margin-top:8px; line-height:1.5; white-space:pre-wrap;" class="muted">${esc(x.notes)}</div>`:''}
-    </div>
-  `).join('')}</div>`;
-}
-
-function openLessonModal(){
-  openModal(`
-    <div class="modal-head"><h3>تسجيل درس إسلامي / تلخيص علمي</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field"><label>عنوان الدرس</label><input id="lTitle"></div>
-    <div class="field"><label>الشيخ / المحاضر</label><input id="lSheikh"></div>
-    <div class="field">
-      <label>علم المادة</label>
-      <select id="lType">
-        <option value="عقيدة">💎 عقيدة</option>
-        <option value="حديث">📜 حديث</option>
-        <option value="فقه">⚖️ فقه وسيرة</option>
-        <option value="تزكية">🌱 تزكية ورقائق</option>
-      </select>
-    </div>
-    <div class="field"><label>فوائد وتلخيص الدرس</label><textarea id="lNotes" style="height:100px;" placeholder="اكتب الفوائد والروابط هنا..."></textarea></div>
-    <button class="btn btn-primary" style="width:100%;" onclick="saveLesson()">تسجيل المادة</button>
-  `);
-}
-function saveLesson(){
-  const title = $('#lTitle').value.trim();
-  if(!title) return;
-  DB.lessons.unshift({
-    id: uid(), title, sheikh: $('#lSheikh').value.trim(),
-    type: $('#lType').value, notes: $('#lNotes').value.trim()
-  });
-  persist.lessons(); closeModal(); renderLessons(); showToast('تم حفظ الدرس والتلخيص الشرعي','🕌');
-  checkAchievements();
-}
-function deleteLesson(id){
-  if(!confirm('هل تريد حذف هذا الدرس؟')) return;
-  DB.lessons = DB.lessons.filter(x=>x.id!==id);
-  persist.lessons(); renderLessons();
-}
-
-/* ====================== GOALS PAGE ====================== */
-function renderGoals(){
-  const g = $('#page-goals');
-  if(!DB.goals2026.length){
-    g.innerHTML = `<div class="empty-state"><div class="ic">🎯</div><p>لم تضع أي أهداف لعام 2026 حتى الآن.</p></div>`;
-    return;
-  }
-  g.innerHTML = `<div style="max-width:650px; margin:0 auto; display:flex; flex-direction:column; gap:10px;">${DB.goals2026.map(x=>`
-    <div class="card habit-row ${x.done?'done':''}" style="margin-bottom:0;" onclick="toggleGoalDone('${x.id}')">
-      <div class="chk">${x.done?'✓':''}</div>
-      <div style="flex:1;">
-        <div class="label" style="font-size:15px; font-weight:700;">${esc(x.title)}</div>
-        ${x.desc?`<div class="muted" style="font-size:12.5px; margin-top:2px;">${esc(x.desc)}</div>`:''}
-      </div>
-      <button class="btn btn-icon btn-ghost" style="width:32px; height:32px; color:var(--danger);" onclick="event.stopPropagation(); deleteGoal('${x.id}')">✕</button>
-    </div>
-  `).join('')}</div>`;
-}
-function openGoalItemModal(){
-  openModal(`
-    <div class="modal-head"><h3>إضافة هدف لعام 2026</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field"><label>ما هو هدفك الكبير؟</label><input id="gTitle" placeholder="مثال: ختم القرآن الكريم حفظاً"></div>
-    <div class="field"><label>خطة مصغرة أو تفاصيل</label><textarea id="gDesc" placeholder="كيف ستحقق هذا الهدف؟"></textarea></div>
-    <button class="btn btn-primary" style="width:100%;" onclick="saveGoal()">إضافة الهدف</button>
-  `);
-}
-function saveGoal(){
-  const title = $('#gTitle').value.trim();
-  if(!title) return;
-  DB.goals2026.push({ id: uid(), title, desc: $('#gDesc').value.trim(), done: false });
-  persist.goals2026(); closeModal(); renderGoals(); showToast('تمت إضافة هدفك لعام 2026','🎯');
-}
-function toggleGoalDone(id){
-  const x = DB.goals2026.find(g=>g.id===id); if(!x) return;
-  x.done = !x.done;
-  persist.goals2026(); renderGoals();
-  if(x.done) { showToast('كفو! خطوة عملاقة نحو الأمام','🏆'); checkAchievements(); }
-}
-function deleteGoal(id){
-  if(!confirm('هل تريد حذف هذا الهدف؟')) return;
-  DB.goals2026 = DB.goals2026.filter(g=>g.id!==id);
-  persist.goals2026(); renderGoals();
-}
-
-/* ====================== ACHIEVEMENTS ====================== */
-const BADGES = [
-  {id:'first_step', title:'البداية المباركة', desc:'أتممت فرائض يوم واحد كاملة', ic:'🌱'},
-  {id:'streak_3', title:'المثابر', desc:'حافظت على الالتزام الكامل 3 أيام متتالية', ic:'🔥'},
-  {id:'streak_7', title:'المستمسك بالعروة', desc:'حافظت على الالتزام الكامل 7 أيام متتالية', ic:'👑'},
-  {id:'quran_start', title:'أهل القرآن', desc:'بدأت تسجيل ورد حفظ القرآن الكريم', ic:'📖'},
-  {id:'book_one', title:'قارئ نهم', desc:'قمت بتحديث كتاب واحد في مكتبتك', ic:'📚'},
-  {id:'lesson_one', title:'طالب العلم', desc:'قيدت أول درس إسلامي مفيد لك', ic:'🕌'},
+/* GOALS */
+function renderGoals(){const g=$('#page-goals');const done=DB.goals2026.filter(x=>x.done).length;g.innerHTML=`<div class="card" style="margin-bottom:20px;text-align:center;"><div style="font-size:28px;font-weight:900;">${done} / ${DB.goals2026.length}</div><div class="muted" style="font-size:13px;font-weight:700;margin-bottom:10px;">أهداف 2026 مكتملة</div><div class="bar-track"><div class="bar-fill gold" style="width:${DB.goals2026.length?Math.round(done/DB.goals2026.length*100):0}%"></div></div></div>${!DB.goals2026.length?`<div class="empty-state"><div class="eic">🎯</div><p>لم تضع أي أهداف بعد.</p><button class="btn btn-primary" onclick="openGoalItemModal()">+ إضافة هدف</button></div>`:`<div style="max-width:650px;margin:0 auto;display:flex;flex-direction:column;gap:10px;">${DB.goals2026.map(x=>`<div class="habit-row ${x.done?'done':''}" onclick="toggleGoalDone('${x.id}')"><div class="chk">${x.done?'✓':''}</div><div style="flex:1;"><div class="hl">${esc(x.title)}</div>${x.desc?`<div class="muted" style="font-size:12px;margin-top:2px;">${esc(x.desc)}</div>`:''}</div><button class="btn btn-icon btn-ghost" style="width:30px;height:30px;color:var(--danger);font-size:11px;" onclick="event.stopPropagation();deleteGoal('${x.id}')">✕</button></div>`).join('')}</div>`}`;}
+function openGoalItemModal(){openModal(`<div class="modal-head"><h3>🎯 إضافة هدف 2026</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div><div class="field"><label>ما هو هدفك؟</label><input id="gTitle" placeholder="مثال: ختم القرآن حفظاً"></div><div class="field"><label>خطة التنفيذ</label><textarea id="gDesc" placeholder="كيف ستحقق هذا الهدف؟"></textarea></div><button class="btn btn-primary" style="width:100%;" onclick="saveGoal()">إضافة الهدف</button>`);}
+function saveGoal(){const title=$('#gTitle').value.trim();if(!title)return;DB.goals2026.push({id:uid(),title,desc:$('#gDesc').value.trim(),done:false});persist.goals2026();closeModal();renderGoals();showToast('تمت إضافة هدفك','🎯');}
+function toggleGoalDone(id){const x=DB.goals2026.find(g=>g.id===id);if(!x)return;x.done=!x.done;if(x.done){x.doneAt=new Date().toISOString();addXP(50);showToast('رائع! أنجزت هدفاً 🏆','🏆');checkAchievements();}persist.goals2026();renderGoals();}
+function deleteGoal(id){if(!confirm('حذف هذا الهدف؟'))return;DB.goals2026=DB.goals2026.filter(g=>g.id!==id);persist.goals2026();renderGoals();}
+/* ACHIEVEMENTS */
+const BADGES=[
+  {id:'first_step',title:'البداية المباركة',desc:'أتممت فرائض يوم كاملة',ic:'🌱',xp:100},
+  {id:'streak_3',title:'المثابر',desc:'3 أيام متتالية من الالتزام',ic:'🔥',xp:150},
+  {id:'streak_7',title:'المستمسك',desc:'7 أيام متتالية',ic:'👑',xp:300},
+  {id:'streak_30',title:'الملتزم الكبير',desc:'30 يوماً متتالياً',ic:'💎',xp:1000},
+  {id:'quran_start',title:'أهل القرآن',desc:'بدأت تسجيل الحفظ',ic:'📖',xp:100},
+  {id:'quran_10',title:'حافظ القرآن',desc:'حفظت 10 سور',ic:'🌟',xp:500},
+  {id:'book_one',title:'قارئ نهم',desc:'أضفت كتاباً لمكتبتك',ic:'📚',xp:100},
+  {id:'lesson_one',title:'طالب العلم',desc:'سجلت أول درس ديني',ic:'🕌',xp:100},
+  {id:'goal_done',title:'المنجز',desc:'أكملت هدفاً من أهداف 2026',ic:'🎯',xp:200},
+  {id:'xp_1000',title:'المتقدم',desc:'جمعت 1000 نقطة XP',ic:'⭐',xp:0},
+  {id:'health_water',title:'المحافظ على الصحة',desc:'سجلت مياه يومياً',ic:'💧',xp:100},
+  {id:'workout_first',title:'البطل',desc:'سجلت أول تمرين',ic:'💪',xp:150},
 ];
 function checkAchievements(){
-  const totalDays = totalCompletedDays();
-  const streak = computeStreak();
-  const hasQuran = !!DB.quranProgress.surah;
-  const hasBooks = DB.books.some(b=>b.progress > 0);
-  const hasLessons = DB.lessons.length > 0;
-
-  const unlocked = [];
-  if(totalDays >= 1) unlocked.push('first_step');
-  if(streak >= 3) unlocked.push('streak_3');
-  if(streak >= 7) unlocked.push('streak_7');
-  if(hasQuran) unlocked.push('quran_start');
-  if(hasBooks) unlocked.push('book_one');
-  if(hasLessons) unlocked.push('lesson_one');
-
-  unlocked.forEach(id=>{
-    if(!DB.achievementsSeen.includes(id)){
-      DB.achievementsSeen.push(id);
-      persist.achievementsSeen();
-      const b = BADGES.find(x=>x.id===id);
-      if(b) setTimeout(()=>showToast(`إنجاز جديد: ${b.title} — ${b.desc}`, b.ic), 1200);
-    }
-  });
+  const streak=computeStreak();const totalDays=totalCompletedDays();
+  const surahCount=Object.values(DB.quranProgress.surahs||{}).filter(s=>s.memorized).length;
+  const hasWater=Object.keys(DB.health.water||{}).length>0;
+  const hasWorkout=(DB.health.workoutLog||[]).length>0;
+  const conds={first_step:totalDays>=1,streak_3:streak>=3,streak_7:streak>=7,streak_30:streak>=30,quran_start:!!DB.quranProgress.surah||surahCount>0,quran_10:surahCount>=10,book_one:DB.books.length>0,lesson_one:DB.lessons.length>0,goal_done:DB.goals2026.some(g=>g.done),xp_1000:(DB.analytics.xp||0)>=1000,health_water:hasWater,workout_first:hasWorkout};
+  Object.entries(conds).forEach(([id,met])=>{if(met&&!DB.achievementsSeen.includes(id)){DB.achievementsSeen.push(id);persist.achievementsSeen();const b=BADGES.find(x=>x.id===id);if(b){setTimeout(()=>showToast(`إنجاز جديد: ${b.title} 🏆`,b.ic),1200);if(b.xp)addXP(b.xp);}}});
 }
 function renderAchievements(){
-  const a = $('#page-achievements');
-  checkAchievements();
-  a.innerHTML = `
-    <div style="text-align:center; margin-bottom:24px;">
-      <h2 style="margin:0 0 4px 0; font-weight:800;">🏆 لوحة الأوسمة والإنجازات</h2>
-      <p class="muted" style="font-size:14px;">أوسمتك تزيد وتضيء كلما زاد التزامك اليومي بفرائضك وقراءتك وطلبك للعلم.</p>
+  const a=$('#page-achievements');checkAchievements();
+  const totalXp=DB.analytics.xp||0;const level=DB.analytics.level||1;const xpProgress=Math.round(((totalXp%500)/500)*100);
+  a.innerHTML=`
+    <div class="card" style="text-align:center;margin-bottom:20px;background:linear-gradient(135deg,var(--primary-dim),var(--bg-elevated));">
+      <div style="font-size:42px;margin-bottom:8px;">⭐</div>
+      <div style="font-size:22px;font-weight:900;">المستوى ${level}</div>
+      <div class="muted" style="font-size:13px;margin:6px 0;">${totalXp} XP — ${500-totalXp%500} XP للمستوى التالي</div>
+      <div class="bar-track" style="margin-top:10px;"><div class="bar-fill gold" style="width:${xpProgress}%"></div></div>
     </div>
-    <div class="grid grid-3">${BADGES.map(b=>{
-      const isLocked = !DB.achievementsSeen.includes(b.id);
-      return `
-        <div class="badge-tile ${isLocked?'locked':''}">
-          <div class="ic">${b.ic}</div>
-          <div style="font-weight:800; font-size:15px; margin-top:4px;">${esc(b.title)}</div>
-          <div class="muted" style="font-size:12px; margin-top:2px; line-height:1.4;">${esc(b.desc)}</div>
-        </div>
-      `;
-    }).join('')}</div>
-  `;
+    <div class="grid grid-3">${BADGES.map(b=>{const locked=!DB.achievementsSeen.includes(b.id);return `<div class="badge-tile ${locked?'locked':''}"><div style="font-size:32px;">${b.ic}</div><div style="font-weight:800;font-size:14px;">${esc(b.title)}</div><div class="muted" style="font-size:11.5px;line-height:1.4;">${esc(b.desc)}</div>${b.xp&&!locked?`<span class="pill" style="background:var(--accent-soft);color:var(--accent);font-size:10px;">+${b.xp} XP</span>`:''}</div>`;}).join('')}</div>`;
 }
 
-/* ====================== FOCUS CENTER ====================== */
-let pomoTimeLeft = 25 * 60;
-let pomoMode = 'work'; // 'work' or 'short'
-let pomoTimerId = null;
+/* FOCUS */
+let pomoTimeLeft=25*60,pomoMode='work',pomoTimerId=null,pomoWork=25,pomoBreak=5;
 function renderFocus(){
-  const f = $('#page-focus');
-  const tk = todayKey();
-  const list = DB.focusTasks[tk] || [];
-
-  f.innerHTML = `
-    <div class="grid grid-2">
-      <div class="card" style="text-align:center; display:flex; flex-direction:column; justify-content:center;">
-        <h3 class="section-title" style="margin-bottom:16px;">⏱️ مؤقت الطماطم (Pomodoro)</h3>
-        <div style="font-size:54px; font-weight:900; font-variant-numeric: tabular-nums; margin:10px 0; letter-spacing:1px;" id="pomoDisplay">
-          ${formatPomoTime(pomoTimeLeft)}
-        </div>
-        <div style="margin-bottom:16px; display:flex; gap:6px; justify-content:center;">
-          <span class="pill" id="pomoModeWork" style="background:${pomoMode==='work'?'var(--primary-dim)':'var(--bg-soft)'}; color:${pomoMode==='work'?'var(--primary)':'var(--text-muted)'}; font-weight:700;">تركيز</span>
-          <span class="pill" id="pomoModeShort" style="background:${pomoMode==='short'?'var(--primary-dim)':'var(--bg-soft)'}; color:${pomoMode==='short'?'var(--primary)':'var(--text-muted)'}; font-weight:700;">راحة قصيرة</span>
-        </div>
-        <div style="display:flex; gap:8px; justify-content:center;">
-          <button class="btn btn-primary" id="pomoStartBtn" onclick="togglePomoTimer()">${pomoTimerId?'إيقاف مؤقت':'▶️ ابدأ التركيز'}</button>
-          <button class="btn" onclick="resetPomoTimer()">🔄 إعادة ضبط</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3 class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
-          <span>🧠 مهام التركيز لليوم</span>
-          <button class="btn" style="padding:4px 10px; font-size:12px;" onclick="openFocusTaskModal()">+ إضافة مهمة</button>
-        </h3>
-        <div id="focusTasksContainer">
-          ${!list.length?`<div class="muted" style="font-size:13.5px; padding:20px 0; text-align:center;">لم تضف مهام تركيز لليوم بعد.</div>`:list.map(x=>`
-            <div class="focus-task" style="background:var(--bg-elevated-2);">
-              <input type="checkbox" ${x.done?'checked':''} style="width:20px; height:20px; cursor:pointer;" onchange="toggleFocusTaskDone('${x.id}')">
-              <span style="flex:1; font-weight:600; font-size:14.5px; text-decoration:${x.done?'line-through':'none'}; opacity:${x.done?.5:1}">${esc(x.title)}</span>
-              <div style="display:flex; align-items:center; gap:4px;">
-                <button class="btn btn-ghost" style="padding:2px 6px; font-size:12px;" onclick="incrementPomoCount('${x.id}')">🍅 +1</button>
-                <span class="pill" style="font-size:11px; font-weight:700;">${x.pomoCount || 0}</span>
-                <button class="btn btn-icon btn-ghost" style="width:26px; height:26px; color:var(--danger); font-size:11px;" onclick="deleteFocusTask('${x.id}')">✕</button>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    </div>
-  `;
-}
-function formatPomoTime(sec){
-  const m = Math.floor(sec/60).toString().padStart(2,'0');
-  const s = (sec%60).toString().padStart(2,'0');
-  return `${m}:${s}`;
-}
-function togglePomoTimer(){
-  if(pomoTimerId){
-    clearInterval(pomoTimerId); pomoTimerId = null;
-  }else{
-    pomoTimerId = setInterval(()=>{
-      pomoTimeLeft--;
-      if(pomoTimeLeft <= 0){
-        clearInterval(pomoTimerId); pomoTimerId = null;
-        try { new Audio('https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg').play(); } catch(e){}
-        if(pomoMode === 'work'){
-          showToast('انتهت جلسة التركيز! خذ قسطاً من الراحة الآن','🍅');
-          pomoMode = 'short'; pomoTimeLeft = 5 * 60;
-        }else{
-          showToast('انتهت الاستراحة، حان وقت العمل والتركيز!','🧠');
-          pomoMode = 'work'; pomoTimeLeft = 25 * 60;
-        }
-      }
-      const disp = $('#pomoDisplay'); if(disp) disp.textContent = formatPomoTime(pomoTimeLeft);
-    }, 1000);
-  }
-  renderFocus();
-}
-function resetPomoTimer(){
-  if(pomoTimerId) { clearInterval(pomoTimerId); pomoTimerId = null; }
-  pomoMode = 'work'; pomoTimeLeft = 25 * 60;
-  renderFocus();
-}
-function openFocusTaskModal(){
-  openModal(`
-    <div class="modal-head"><h3>إضافة مهمة تركيز</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field"><label>ما هي المهمة التي تريد التركيز عليها الآن؟</label><input id="ftTitle" placeholder="مثال: مراجعة محاضرة علم النفس"></div>
-    <button class="btn btn-primary" style="width:100%;" onclick="saveFocusTask()">إضافة</button>
-  `);
-}
-function saveFocusTask(){
-  const title = $('#ftTitle').value.trim(); if(!title) return;
-  const tk = todayKey(); if(!DB.focusTasks[tk]) DB.focusTasks[tk]=[];
-  DB.focusTasks[tk].push({ id:uid(), title, done:false, pomoCount:0 });
-  persist.focusTasks(); closeModal(); renderFocus(); showToast('تمت إضافة مهمة التركيز بنجاح','🧠');
-}
-function toggleFocusTaskDone(id){
-  const tk = todayKey(); const list = DB.focusTasks[tk] || [];
-  const x = list.find(t=>t.id===id); if(!x) return;
-  x.done = !x.done; persist.focusTasks(); renderFocus();
-}
-function incrementPomoCount(id){
-  const tk = todayKey(); const list = DB.focusTasks[tk] || [];
-  const x = list.find(t=>t.id===id); if(!x) return;
-  x.pomoCount = (x.pomoCount || 0) + 1; persist.focusTasks(); renderFocus(); showToast('كفو! تم تسجيل جلسة تركيز طماطم ناجحة','🍅');
-}
-function deleteFocusTask(id){
-  const tk = todayKey(); if(!DB.focusTasks[tk]) return;
-  DB.focusTasks[tk] = DB.focusTasks[tk].filter(t=>t.id!==id);
-  persist.focusTasks(); renderFocus();
-}
-
-/* ====================== WALLET CENTER ====================== */
-const WALLETS = [['instapay','InstaPay 📲'], ['cash','كاش / محفظة 💵']];
-function renderWallet(){
-  const w = $('#page-wallet');
-  const total = Object.values(DB.wallet).reduce((a,b)=>a+b,0);
-
-  w.innerHTML = `
-    <div class="grid grid-3" style="margin-bottom:24px;">
+  const f=$('#page-focus');const tk=todayKey();const list=DB.focusTasks[tk]||[];
+  f.innerHTML=`
+    <div class="grid grid-2" style="margin-bottom:20px;">
       <div class="card" style="text-align:center;">
-        <div class="muted" style="font-size:13px; font-weight:700;">إجمالي المحفظة المالي</div>
-        <div style="font-size:28px; font-weight:900; color:var(--primary); margin:6px 0;">${total.toFixed(2)} <span style="font-size:15px;">ج.م</span></div>
-      </div>
-      ${WALLETS.map(([key,lbl])=>`
-        <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-weight:700; font-size:14px;" class="muted">${lbl}</span>
-            <button class="btn btn-ghost" style="padding:2px 6px; font-size:11px;" onclick="openEditBalanceModal('${key}')">✏️ تعديل</button>
+        <h3 class="section-title">⏱️ مؤقت بومودورو</h3>
+        <div class="pomo-display" id="pomoDisplay">${fmtPomo(pomoTimeLeft)}</div>
+        <div style="display:flex;gap:6px;justify-content:center;margin-bottom:16px;">
+          <span class="pill" style="background:${pomoMode==='work'?'var(--primary-dim)':'var(--bg-soft)'};color:${pomoMode==='work'?'var(--primary)':'var(--text-muted)'};">🧠 تركيز ${pomoWork}د</span>
+          <span class="pill" style="background:${pomoMode==='short'?'var(--primary-dim)':'var(--bg-soft)'};color:${pomoMode==='short'?'var(--primary)':'var(--text-muted)'};">☕ راحة ${pomoBreak}د</span>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:14px;">
+          <button class="btn btn-primary" onclick="togglePomoTimer()">${pomoTimerId?'⏸ إيقاف':'▶️ ابدأ'}</button>
+          <button class="btn" onclick="resetPomoTimer()">🔄 إعادة</button>
+        </div>
+        <div style="border-top:1px solid var(--border-soft);padding-top:14px;">
+          <label>اختر مدة الجلسة</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;">
+            <button class="btn btn-sm ${pomoWork===25?'btn-primary':''}" onclick="setPomoMode(25,5)">25/5</button>
+            <button class="btn btn-sm ${pomoWork===50?'btn-primary':''}" onclick="setPomoMode(50,10)">50/10</button>
+            <button class="btn btn-sm ${pomoWork===90?'btn-primary':''}" onclick="setPomoMode(90,20)">90/20</button>
           </div>
-          <div style="font-size:20px; font-weight:800; margin-top:8px;">${(DB.wallet[key]||0).toFixed(2)} <span style="font-size:12px;">ج.م</span></div>
         </div>
-      `).join('')}
-    </div>
-
-    <div class="card">
-      <h3 class="section-title">📊 آخر المعاملات المالية</h3>
-      ${!DB.transactions.length?`<div class="empty-state" style="padding:20px 0;"><p>لا توجد معاملات مسجلة بعد.</p></div>`:`
-        <div style="overflow-x:auto;">
-          <table style="width:100%; border-collapse:collapse; font-size:14px; text-align:start;">
-            <thead>
-              <tr style="border-bottom:1px solid var(--border); color:var(--text-muted); font-weight:700;">
-                <th style="padding:10px 6px;">التاريخ</th>
-                <th style="padding:10px 6px;">البيان</th>
-                <th style="padding:10px 6px;">المحفظة</th>
-                <th style="padding:10px 6px;">المبلغ</th>
-                <th style="padding:10px 6px; width:40px;"></th>
-              </tr>
-            </thead>
-            <tbody>
-              ${DB.transactions.map(t=>`
-                <tr style="border-bottom:1px solid var(--border-soft);">
-                  <td style="padding:12px 6px;" class="muted">${esc(t.date)}</td>
-                  <td style="padding:12px 6px; font-weight:600;">${esc(t.desc)}</td>
-                  <td style="padding:12px 6px;"><span class="pill">${WALLETS.find(x=>x[0]===t.wallet)?.[1]||t.wallet}</span></td>
-                  <td style="padding:12px 6px; font-weight:800; color:${t.type==='income'?'var(--success)':'var(--danger)'}">
-                    ${t.type==='income'?'+':'-'}${t.amount.toFixed(2)}
-                  </td>
-                  <td style="padding:12px 6px;">
-                    <button class="btn btn-icon btn-ghost" style="width:26px; height:26px; color:var(--danger);" onclick="deleteTransaction('${t.id}')">✕</button>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      `}
-    </div>
-  `;
+      </div>
+      <div class="card">
+        <h3 class="section-title" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>🧠 مهام التركيز</span>
+          <button class="btn btn-sm" onclick="openFocusTaskModal()">+ إضافة</button>
+        </h3>
+        ${!list.length?`<div class="muted" style="font-size:13.5px;padding:20px 0;text-align:center;">لم تضف مهام لليوم بعد.</div>`:list.map(x=>`<div class="focus-task-row"><input type="checkbox" ${x.done?'checked':''} style="width:20px;height:20px;cursor:pointer;" onchange="toggleFocusTaskDone('${x.id}')"><span style="flex:1;font-weight:600;font-size:14px;text-decoration:${x.done?'line-through':'none'};opacity:${x.done?.5:1}">${esc(x.title)}</span><button class="btn btn-ghost btn-sm" onclick="incrementPomoCount('${x.id}')">🍅</button><span class="pill" style="font-size:11px;">${x.pomoCount||0}</span><button class="btn btn-icon btn-ghost" style="width:26px;height:26px;color:var(--danger);font-size:11px;" onclick="deleteFocusTask('${x.id}')">✕</button></div>`).join('')}
+      </div>
+    </div>`;
 }
-function openTransactionModal(){
-  openModal(`
-    <div class="modal-head"><h3>تسجيل معاملة مالية جديدة</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field">
-      <label>نوع المعاملة</label>
-      <div class="seg-toggle">
-        <input type="radio" name="txType" id="txTypeExpense" value="expense" checked>
-        <label for="txTypeExpense">💸 مصروفات</label>
-        <input type="radio" name="txType" id="txTypeIncome" value="income">
-        <label for="txTypeIncome">💰 إيرادات / دخل</label>
+function fmtPomo(sec){return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;}
+function setPomoMode(work,brk){pomoWork=work;pomoBreak=brk;resetPomoTimer();}
+function togglePomoTimer(){
+  if(pomoTimerId){clearInterval(pomoTimerId);pomoTimerId=null;}
+  else{pomoTimerId=setInterval(()=>{pomoTimeLeft--;if(pomoTimeLeft<=0){clearInterval(pomoTimerId);pomoTimerId=null;try{new Audio('https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg').play();}catch(e){}if(pomoMode==='work'){showToast('انتهت جلسة التركيز! خذ راحة','🍅');pomoMode='short';pomoTimeLeft=pomoBreak*60;}else{showToast('انتهت الراحة، حان العمل!','🧠');pomoMode='work';pomoTimeLeft=pomoWork*60;}}const d=$('#pomoDisplay');if(d)d.textContent=fmtPomo(pomoTimeLeft);},1000);}
+  renderFocus();
+}
+function resetPomoTimer(){if(pomoTimerId){clearInterval(pomoTimerId);pomoTimerId=null;}pomoMode='work';pomoTimeLeft=pomoWork*60;renderFocus();}
+function openFocusTaskModal(){openModal(`<div class="modal-head"><h3>🧠 مهمة تركيز</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div><div class="field"><label>ما المهمة؟</label><input id="ftTitle" placeholder="مثال: مراجعة محاضرة اليوم"></div><button class="btn btn-primary" style="width:100%;" onclick="saveFocusTask()">إضافة</button>`);}
+function saveFocusTask(){const title=$('#ftTitle').value.trim();if(!title)return;const tk=todayKey();if(!DB.focusTasks[tk])DB.focusTasks[tk]=[];DB.focusTasks[tk].push({id:uid(),title,done:false,pomoCount:0});persist.focusTasks();closeModal();renderFocus();showToast('تمت إضافة المهمة','🧠');}
+function toggleFocusTaskDone(id){const tk=todayKey();const list=DB.focusTasks[tk]||[];const x=list.find(t=>t.id===id);if(!x)return;x.done=!x.done;persist.focusTasks();renderFocus();if(x.done){addXP(20);showToast('أنجزت مهمة! ✅','✅');}}
+function incrementPomoCount(id){const tk=todayKey();const list=DB.focusTasks[tk]||[];const x=list.find(t=>t.id===id);if(!x)return;x.pomoCount=(x.pomoCount||0)+1;persist.focusTasks();renderFocus();addXP(10);showToast('جلسة طماطم مسجلة! 🍅','🍅');}
+function deleteFocusTask(id){const tk=todayKey();if(!DB.focusTasks[tk])return;DB.focusTasks[tk]=DB.focusTasks[tk].filter(t=>t.id!==id);persist.focusTasks();renderFocus();}
+
+/* WALLET */
+const WALLETS=[['instapay','InstaPay 📲'],['cash','كاش 💵']];
+function renderWallet(){
+  const w=$('#page-wallet');const total=Object.values(DB.wallet).reduce((a,b)=>a+b,0);
+  const mkey=new Date().toISOString().slice(0,7);
+  const mTx=DB.transactions.filter(t=>t.date.startsWith(mkey));
+  const mInc=mTx.filter(t=>t.type==='income').reduce((a,t)=>a+t.amount,0);
+  const mExp=mTx.filter(t=>t.type==='expense').reduce((a,t)=>a+t.amount,0);
+  w.innerHTML=`
+    <div class="grid grid-4" style="margin-bottom:22px;">
+      <div class="stat-card"><div class="stat-val" style="color:var(--primary);">${total.toFixed(0)}<span style="font-size:13px;">ج.م</span></div><div class="stat-lbl">إجمالي المحفظة</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--success);">${mInc.toFixed(0)}</div><div class="stat-lbl">دخل الشهر</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--danger);">${mExp.toFixed(0)}</div><div class="stat-lbl">مصروف الشهر</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:${mInc-mExp>=0?'var(--success)':'var(--danger)'};">${(mInc-mExp).toFixed(0)}</div><div class="stat-lbl">صافي الشهر</div></div>
+    </div>
+    <div class="grid grid-2" style="margin-bottom:22px;">${WALLETS.map(([key,lbl])=>`<div class="card" style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-weight:700;font-size:14px;" class="muted">${lbl}</div><div style="font-size:22px;font-weight:800;margin-top:4px;">${(DB.wallet[key]||0).toFixed(0)}<span style="font-size:12px;"> ج.م</span></div></div><button class="btn btn-sm" onclick="openEditBalanceModal('${key}')">✏️ تعديل</button></div>`).join('')}</div>
+    <div class="card"><h3 class="section-title">📋 آخر المعاملات</h3>${!DB.transactions.length?`<div class="empty-state" style="padding:20px 0;"><p>لا توجد معاملات بعد.</p></div>`:`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;text-align:start;"><thead><tr style="border-bottom:1px solid var(--border);color:var(--text-muted);font-weight:700;"><th style="padding:10px 6px;">التاريخ</th><th style="padding:10px 6px;">البيان</th><th style="padding:10px 6px;">المحفظة</th><th style="padding:10px 6px;">المبلغ</th><th style="padding:10px 6px;width:36px;"></th></tr></thead><tbody>${DB.transactions.map(t=>`<tr style="border-bottom:1px solid var(--border-soft);"><td style="padding:11px 6px;" class="muted">${esc(t.date)}</td><td style="padding:11px 6px;font-weight:600;">${esc(t.desc)}</td><td style="padding:11px 6px;"><span class="pill">${WALLETS.find(x=>x[0]===t.wallet)?.[1]||t.wallet}</span></td><td style="padding:11px 6px;font-weight:800;color:${t.type==='income'?'var(--success)':'var(--danger)'};">${t.type==='income'?'+':'-'}${t.amount.toFixed(0)}</td><td style="padding:11px 6px;"><button class="btn btn-icon btn-ghost" style="width:26px;height:26px;color:var(--danger);font-size:11px;" onclick="deleteTransaction('${t.id}')">✕</button></td></tr>`).join('')}</tbody></table></div>`}</div>`;
+}
+function openTransactionModal(){openModal(`<div class="modal-head"><h3>💰 معاملة مالية</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div><div class="field"><label>النوع</label><div class="seg-toggle"><input type="radio" name="txType" id="txTypeExp" value="expense" checked><label for="txTypeExp">💸 مصروف</label><input type="radio" name="txType" id="txTypeInc" value="income"><label for="txTypeInc">💰 دخل</label></div></div><div class="field"><label>المحفظة</label><select id="txWallet">${WALLETS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select></div><div class="field"><label>المبلغ (ج.م)</label><input id="txAmount" type="number" step="0.01" placeholder="0.00"></div><div class="field"><label>البيان</label><input id="txDesc" placeholder="مثال: غداء، كورس..."></div><button class="btn btn-primary" style="width:100%;" onclick="saveTransaction()">تسجيل</button>`);}
+function saveTransaction(){const amount=parseFloat($('#txAmount').value);const desc=$('#txDesc').value.trim();const wallet=$('#txWallet').value;const type=$('input[name="txType"]:checked').value;if(isNaN(amount)||amount<=0||!desc)return;DB.transactions.unshift({id:uid(),date:todayKey(),type,wallet,amount,desc});DB.wallet[wallet]=(DB.wallet[wallet]||0)+(type==='income'?amount:-amount);persist.transactions();persist.wallet();closeModal();renderWallet();showToast('تم تسجيل المعاملة','💰');}
+function deleteTransaction(id){if(!confirm('حذف؟'))return;const t=DB.transactions.find(x=>x.id===id);if(!t)return;DB.wallet[t.wallet]=(DB.wallet[t.wallet]||0)-(t.type==='income'?t.amount:-t.amount);DB.transactions=DB.transactions.filter(x=>x.id!==id);persist.transactions();persist.wallet();renderWallet();}
+function openEditBalanceModal(key){const w=WALLETS.find(x=>x[0]===key);openModal(`<div class="modal-head"><h3>تعديل ${w[1]}</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div><div class="field"><label>الرصيد (ج.م)</label><input id="editBal" type="number" step="0.01" value="${DB.wallet[key]||0}"></div><button class="btn btn-primary" style="width:100%;" onclick="saveEditBalance('${key}')">حفظ</button>`);}
+function saveEditBalance(key){const val=Number($('#editBal').value);DB.wallet[key]=isNaN(val)?0:val;persist.wallet();closeModal();renderWallet();}
+/* OSMAN NOW */
+function renderOsmanNow(){
+  const on=$('#page-osmanNow');
+  const streak=computeStreak();const today=getDay(todayKey());const pct=dayCompletionPct(today);
+  const todayMood=DB.mood[todayKey()];
+  const lastJournal=DB.journal[0];
+  const lastBody=(DB.health.bodyStats||[]).slice(-1)[0];
+  const pendingGoals=DB.goals2026.filter(g=>!g.done).length;
+  const total=Object.values(DB.wallet).reduce((a,b)=>a+b,0);
+  const qUpdate=DB.quranProgress.updatedAt?new Date(DB.quranProgress.updatedAt).toLocaleDateString('ar-EG'):'لم يُسجَّل بعد';
+  const lastCourse=DB.courses.slice().sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||'')).find(c=>c.updatedAt);
+  const lastCourseDate=lastCourse?new Date(lastCourse.updatedAt).toLocaleDateString('ar-EG'):'لم يُسجَّل';
+  const mostDelayedGoal=DB.goals2026.filter(g=>!g.done)[0];
+  let statusClass='status-green',statusLabel='🟢 ممتاز';
+  if(pct<50||streak===0){statusClass='status-red';statusLabel='🔴 يحتاج انتباه';}
+  else if(pct<80){statusClass='status-yellow';statusLabel='🟡 يحتاج تحسين';}
+  on.innerHTML=`
+    <div style="margin-bottom:24px;">
+      <h2 style="margin:0 0 4px;font-size:22px;font-weight:900;">⚡ عثمان الآن</h2>
+      <p class="muted" style="font-size:14px;">نظرة 10 ثوانٍ على حياتك الآن</p>
+    </div>
+    <div style="text-align:center;margin-bottom:24px;"><span class="life-status-badge ${statusClass}">${statusLabel}</span></div>
+    <div class="grid grid-2">
+      <div>
+        <div class="now-item"><span class="now-icon">🎭</span><div><div class="now-label">الحالة المزاجية</div><div class="now-val">${todayMood||'لم تُحدد بعد'}</div></div></div>
+        <div class="now-item"><span class="now-icon">🕌</span><div><div class="now-label">العبادات اليوم</div><div class="now-val">${pct}% مكتمل</div></div></div>
+        <div class="now-item"><span class="now-icon">🔥</span><div><div class="now-label">سلسلة الالتزام</div><div class="now-val">${streak} يوم</div></div></div>
+        <div class="now-item"><span class="now-icon">📖</span><div><div class="now-label">آخر حفظ للقرآن</div><div class="now-val">${qUpdate}</div></div></div>
+        <div class="now-item"><span class="now-icon">🎓</span><div><div class="now-label">آخر كورس محدّث</div><div class="now-val">${lastCourseDate}</div></div></div>
+      </div>
+      <div>
+        <div class="now-item"><span class="now-icon">💰</span><div><div class="now-label">الكاش المتاح</div><div class="now-val">${total.toFixed(0)} ج.م</div></div></div>
+        <div class="now-item"><span class="now-icon">🎯</span><div><div class="now-label">أهداف متبقية</div><div class="now-val">${pendingGoals} هدف</div></div></div>
+        <div class="now-item"><span class="now-icon">✍️</span><div><div class="now-label">آخر يومية</div><div class="now-val">${lastJournal?lastJournal.date:'لم تكتب بعد'}</div></div></div>
+        <div class="now-item"><span class="now-icon">💪</span><div><div class="now-label">آخر وزن مسجل</div><div class="now-val">${lastBody&&lastBody.weight?lastBody.weight+' كج':'لم يُسجَّل'}</div></div></div>
+        ${mostDelayedGoal?`<div class="now-item" style="border-color:var(--warning);"><span class="now-icon">⚠️</span><div><div class="now-label">هدف متأخر</div><div class="now-val" style="color:var(--warning);">${esc(mostDelayedGoal.title)}</div></div></div>`:''}
       </div>
     </div>
-    <div class="field">
-      <label>المحفظة المستخدمة</label>
-      <select id="txWallet">${WALLETS.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select>
+    <div style="margin-top:20px;padding:16px;background:var(--primary-dim);border-radius:var(--radius-m);border:1px solid var(--primary);text-align:center;">
+      <div style="font-weight:800;font-size:14px;color:var(--primary);">"ما الشيء الأكثر أهمية الآن؟"</div>
+      ${pct<100?`<div style="margin-top:8px;font-size:13px;" class="muted">→ ${OBLIGATORY.find(k=>!today[k])?'أكمل فرائضك أولاً':'أذكارك وقرآنك في انتظارك'}</div>`:'<div style="margin-top:8px;font-size:13px;color:var(--success);font-weight:700;">أتممت عبادات اليوم! ابدأ التعلم الآن 📚</div>'}
+    </div>`;
+}
+
+/* HEATMAP */
+function renderHeatmap(){
+  const hm=$('#page-heatmap');
+  const streak=computeStreak();const longestStreak=computeLongestStreak();const totalGood=totalCompletedDays();
+  const now=new Date();const year=now.getFullYear();
+  const jan1=new Date(year,0,1);const startDay=jan1.getDay();
+  let days=[];for(let i=0;i<365+(new Date(year,1,29).getMonth()===1?1:0);i++){const d=new Date(year,0,1+i);if(d.getFullYear()===year)days.push(todayKey(d));}
+  hm.innerHTML=`
+    <div class="grid grid-3" style="margin-bottom:20px;">
+      <div class="stat-card"><div class="stat-val" style="color:var(--accent);">${streak}🔥</div><div class="stat-lbl">السلسلة الحالية</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--primary);">${longestStreak}</div><div class="stat-lbl">أطول سلسلة</div></div>
+      <div class="stat-card"><div class="stat-val">${totalGood}</div><div class="stat-lbl">أيام الإنجاز الكاملة</div></div>
     </div>
-    <div class="field"><label>المبلغ (ج.م)</label><input id="txAmount" type="number" step="0.01" placeholder="0.00"></div>
-    <div class="field"><label>البيان / الوصف</label><input id="txDesc" placeholder="مثال: شراء كورس أو غداء"></div>
-    <button class="btn btn-primary" style="width:100%; margin-top:8px;" onclick="saveTransaction()">تسجيل المعاملة</button>
-  `);
+    <div class="card" style="margin-bottom:20px;">
+      <h3 class="section-title">📅 خريطة العام ${year}</h3>
+      <div class="heatmap-grid" id="heatmapGrid"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;" class="muted">
+        <span>أقل</span><div style="width:14px;height:14px;border-radius:3px;background:var(--bg-soft);border:1px solid var(--border);"></div><div style="width:14px;height:14px;border-radius:3px;background:#c6e6d4;"></div><div style="width:14px;height:14px;border-radius:3px;background:#74c89a;"></div><div style="width:14px;height:14px;border-radius:3px;background:#2FA876;"></div><div style="width:14px;height:14px;border-radius:3px;background:#1F6F54;"></div><span>أكثر</span>
+      </div>
+    </div>
+    <div id="heatmapDayDetail"></div>`;
+  const grid=$('#heatmapGrid');
+  for(let i=0;i<startDay;i++)grid.insertAdjacentHTML('beforeend','<div style="width:14px;height:14px;"></div>');
+  days.forEach(dk=>{
+    const score=computeDayScore(dk);const isFuture=dk>todayKey();
+    let cls='hm-0';
+    if(!isFuture){if(score>=80)cls='hm-4';else if(score>=60)cls='hm-3';else if(score>=40)cls='hm-2';else if(score>=20)cls='hm-1';}
+    grid.insertAdjacentHTML('beforeend',`<div class="hm-day ${cls}" title="${dk}: ${Math.round(score)}%" onclick="showHeatmapDay('${dk}')"></div>`);
+  });
 }
-function saveTransaction(){
-  const amount = parseFloat($('#txAmount').value);
-  const desc = $('#txDesc').value.trim();
-  const wallet = $('#txWallet').value;
-  const type = $('input[name="txType"]:checked').value;
-
-  if(isNaN(amount) || amount <= 0 || !desc) return;
-
-  const t = { id: uid(), date: todayKey(), type, wallet, amount, desc };
-  DB.transactions.unshift(t);
-
-  // تحديث الحساب المالي تلقائياً
-  DB.wallet[wallet] = (DB.wallet[wallet] || 0) + (type === 'income' ? amount : -amount);
-
-  persist.transactions();
-  persist.wallet();
-  closeModal();
-  renderWallet();
-  showToast('تم تسجيل المعاملة وتحديث المحفظة بنجاح','💰');
-}
-function deleteTransaction(id){
-  if(!confirm('هل تريد حذف هذه المعاملة؟')) return;
-  const t = DB.transactions.find(x=>x.id===id); if(!t) return;
-  DB.wallet[t.wallet] = (DB.wallet[t.wallet]||0) - (t.type==='income' ? t.amount : -t.amount);
-  DB.transactions = DB.transactions.filter(x=>x.id!==id);
-  persist.transactions(); persist.wallet(); renderWallet();
-}
-function openEditBalanceModal(key){
-  const w = WALLETS.find(x=>x[0]===key);
-  openModal(`
-    <div class="modal-head"><h3>تعديل رصيد ${w[1]}</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div>
-    <div class="field"><label>الرصيد الحالي (ج.م)</label><input id="editBalanceInput" type="number" step="0.01" value="${DB.wallet[key]||0}"></div>
-    <button class="btn btn-primary" style="width:100%;" onclick="saveEditBalance('${key}')">حفظ</button>
-  `);
-}
-function saveEditBalance(key){
-  const val = Number($('#editBalanceInput').value);
-  DB.wallet[key] = isNaN(val) ? 0 : val;
-  persist.wallet(); closeModal(); renderWallet();
+function showHeatmapDay(dk){
+  const detail=$('#heatmapDayDetail');if(!detail)return;
+  const day=DB.prayerHistory[dk]||emptyDay();const pct=dayCompletionPct(day);const score=computeDayScore(dk);
+  const done=HABIT_KEYS.filter(k=>day[k]);const moodOfDay=DB.mood[dk];
+  detail.innerHTML=`<div class="card"><h3 class="section-title">📋 تفاصيل يوم ${dk}</h3><div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;"><div class="stat-card" style="flex:1;min-width:110px;"><div class="stat-val" style="font-size:20px;">${pct}%</div><div class="stat-lbl">العبادات</div></div><div class="stat-card" style="flex:1;min-width:110px;"><div class="stat-val" style="font-size:20px;">${Math.round(score)}%</div><div class="stat-lbl">النتيجة الكلية</div></div>${moodOfDay?`<div class="stat-card" style="flex:1;min-width:110px;"><div class="stat-val" style="font-size:20px;">${moodOfDay}</div><div class="stat-lbl">المزاج</div></div>`:''}</div><div style="display:flex;flex-wrap:wrap;gap:6px;">${done.map(k=>`<span class="pill" style="background:var(--success-soft);color:var(--success);">${k}</span>`).join('')}${!done.length?'<span class="muted" style="font-size:13px;">لا توجد عبادات مسجلة</span>':''}</div></div>`;
 }
 
-/* ====================== BOOT & SHORTCUTS ====================== */
+/* ANALYTICS */
+function renderAnalytics(){
+  const an=$('#page-analytics');
+  const weeks=[];for(let i=11;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i*7);weeks.push({label:`أ${12-i}`,start:todayKey(d)});}
+  const prayerWeeklyAvg=weeks.map(w=>{let sum=0,count=0;for(let i=0;i<7;i++){const d=new Date(w.start);d.setDate(d.getDate()+i);const day=DB.prayerHistory[todayKey(d)];if(day){sum+=dayCompletionPct(day);count++;}}return count?Math.round(sum/count):0;});
+  const allPcts=Object.values(DB.prayerHistory).map(d=>dayCompletionPct(d)).filter(p=>p>0);
+  const avgPct=allPcts.length?Math.round(allPcts.reduce((a,b)=>a+b,0)/allPcts.length):0;
+  const monthData=[];for(let i=5;i>=0;i--){const d=new Date();d.setMonth(d.getMonth()-i);const mk=d.toISOString().slice(0,7);const mTx=DB.transactions.filter(t=>t.date.startsWith(mk));const exp=mTx.filter(t=>t.type==='expense').reduce((a,t)=>a+t.amount,0);monthData.push({label:GREG_MONTHS[d.getMonth()].slice(0,3),value:exp});}
+  const maxExp=Math.max(...monthData.map(m=>m.value),1);
+  an.innerHTML=`
+    <div class="grid grid-4" style="margin-bottom:24px;">
+      <div class="stat-card"><div class="stat-val" style="color:var(--primary);">${computeStreak()}🔥</div><div class="stat-lbl">السلسلة الحالية</div></div>
+      <div class="stat-card"><div class="stat-val">${computeLongestStreak()}</div><div class="stat-lbl">أطول سلسلة</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--success);">${avgPct}%</div><div class="stat-lbl">معدل الالتزام</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--accent);">${totalCompletedDays()}</div><div class="stat-lbl">أيام كاملة</div></div>
+    </div>
+    <div class="grid grid-2" style="margin-bottom:20px;">
+      <div class="card"><h3 class="section-title">📊 معدل العبادات (12 أسبوع)</h3><div class="chart-bars">${prayerWeeklyAvg.map((p,i)=>`<div class="chart-col"><div class="chart-fill" style="height:${clamp(p,4,100)}%"></div><span class="chart-lbl">${weeks[i].label}</span></div>`).join('')}</div></div>
+      <div class="card"><h3 class="section-title">💰 المصروفات (6 شهور)</h3><div class="chart-bars">${monthData.map(m=>`<div class="chart-col"><div class="chart-fill" style="height:${clamp(Math.round(m.value/maxExp*100),4,100)}%;background:linear-gradient(180deg,var(--accent),var(--warning));"></div><span class="chart-lbl">${m.label}</span></div>`).join('')}</div></div>
+    </div>
+    <div class="grid grid-3">
+      <div class="card"><h3 class="section-title">🎓 الكورسات</h3><div style="font-size:13.5px;display:flex;flex-direction:column;gap:6px;"><div class="muted">إجمالي: <strong>${DB.courses.length}</strong></div><div class="muted">ساعات مكتملة: <strong>${DB.courses.reduce((a,c)=>a+(c.completedHours||0),0).toFixed(0)}</strong></div><div class="muted">المعدل: <strong>${DB.courses.length?Math.round(DB.courses.reduce((a,c)=>a+((c.completedHours||0)/(c.totalHours||1)),0)/DB.courses.length*100):0}%</strong></div></div></div>
+      <div class="card"><h3 class="section-title">📖 القرآن</h3><div style="font-size:13.5px;display:flex;flex-direction:column;gap:6px;"><div class="muted">سور محفوظة: <strong>${Object.values(DB.quranProgress.surahs||{}).filter(s=>s.memorized).length}</strong></div><div class="muted">سور مراجعة: <strong>${Object.values(DB.quranProgress.surahs||{}).filter(s=>s.reviewed).length}</strong></div></div></div>
+      <div class="card"><h3 class="section-title">🎯 الأهداف</h3><div style="font-size:13.5px;display:flex;flex-direction:column;gap:6px;"><div class="muted">إجمالي: <strong>${DB.goals2026.length}</strong></div><div class="muted">مكتمل: <strong>${DB.goals2026.filter(g=>g.done).length}</strong></div><div class="muted">نسبة: <strong>${DB.goals2026.length?Math.round(DB.goals2026.filter(g=>g.done).length/DB.goals2026.length*100):0}%</strong></div></div></div>
+    </div>`;
+}
+/* HEALTH HUB */
+function renderHealth(){
+  const h=$('#page-health');const tab=HEALTH_TAB;
+  h.innerHTML=`<div class="tab-row"><button class="tab-btn ${tab==='water'?'active':''}" onclick="HEALTH_TAB='water';renderHealth()">💧 الماء</button><button class="tab-btn ${tab==='vitamins'?'active':''}" onclick="HEALTH_TAB='vitamins';renderHealth()">💊 الفيتامينات</button><button class="tab-btn ${tab==='nutrition'?'active':''}" onclick="HEALTH_TAB='nutrition';renderHealth()">🥗 التغذية</button><button class="tab-btn ${tab==='workout'?'active':''}" onclick="HEALTH_TAB='workout';renderHealth()">🏋️ الجيم</button><button class="tab-btn ${tab==='body'?'active':''}" onclick="HEALTH_TAB='body';renderHealth()">📏 القياسات</button></div><div id="healthTabContent"></div>`;
+  const c=$('#healthTabContent');
+  if(tab==='water')renderWaterTab(c);
+  else if(tab==='vitamins')renderVitaminsTab(c);
+  else if(tab==='nutrition')renderNutritionTab(c);
+  else if(tab==='workout')renderWorkoutTab(c);
+  else if(tab==='body')renderBodyTab(c);
+}
+function renderWaterTab(c){
+  const tk=todayKey();const today=(DB.health.water||{})[tk]||0;const goal=2000;const pct=Math.round(Math.min(today/goal,1)*100);
+  c.innerHTML=`<div class="card" style="text-align:center;margin-bottom:16px;"><div style="font-size:42px;margin-bottom:4px;">💧</div><div style="font-size:36px;font-weight:900;color:#2563eb;">${today}<span style="font-size:16px;"> مل</span></div><div class="muted" style="font-size:13px;margin:6px 0;">من ${goal} مل (${pct}%)</div><div class="bar-track" style="margin:12px 0;height:14px;border-radius:99px;"><div style="height:100%;border-radius:99px;background:linear-gradient(90deg,#60a5fa,#2563eb);width:${pct}%;transition:width .7s var(--ease);"></div></div>${pct>=100?'<div style="color:var(--success);font-weight:800;">🎉 وصلت لهدفك اليومي!</div>':pct>=60?'<div style="color:var(--warning);font-weight:700;">💪 أنت في المنتصف، استمر</div>':'<div class="muted">اشرب الماء، جسمك يحتاجه</div>'}</div><div style="display:flex;gap:10px;margin-bottom:16px;"><button class="water-btn" onclick="addWater(250)">+250 مل</button><button class="water-btn" onclick="addWater(500)">+500 مل</button><button class="water-btn" onclick="addWater(1000)">+1 لتر</button></div><button class="btn btn-ghost" onclick="resetWaterToday()" style="font-size:13px;">🔄 إعادة ضبط اليوم</button>`;
+}
+function addWater(ml){if(!DB.health.water)DB.health.water={};const tk=todayKey();DB.health.water[tk]=(DB.health.water[tk]||0)+ml;persist.health();renderHealth();showToast(`+${ml} مل ماء 💧`,'💧');checkAchievements();}
+function renderVitaminsTab(c){
+  if(!DB.health.vitamins)DB.health.vitamins=[];if(!DB.health.vitaminLog)DB.health.vitaminLog={};
+  const tk=todayKey();const log=(DB.health.vitaminLog[tk])||{};
+  const takenCount=DB.health.vitamins.filter(v=>log[v.id]).length;const total=DB.health.vitamins.length;
+  c.innerHTML=`<div class="card" style="margin-bottom:16px;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><h3 class="section-title" style="margin:0;">💊 فيتامينات اليوم</h3><div style="font-weight:800;color:var(--primary);">${takenCount}/${total}</div></div><div class="bar-track" style="margin-bottom:14px;"><div class="bar-fill" style="width:${total?Math.round(takenCount/total*100):0}%"></div></div>${!DB.health.vitamins.length?`<div class="empty-state" style="padding:20px 0;"><p>أضف فيتاميناتك أولاً.</p></div>`:DB.health.vitamins.map(v=>`<div class="vitamin-check ${log[v.id]?'taken':''}" onclick="toggleVitamin('${v.id}')"><div class="chk">${log[v.id]?'✓':''}</div><div style="flex:1;"><div style="font-weight:700;font-size:14px;">${esc(v.name)}</div><div class="muted" style="font-size:12px;">${esc(v.dose||'')} — ${esc(v.freq||'')}</div></div>${log[v.id]?'<span style="color:var(--success);font-size:18px;">✅</span>':''}</div>`).join('')}<button class="btn btn-sm" style="margin-top:10px;" onclick="openAddVitaminModal()">+ إضافة فيتامين</button></div>`;
+}
+function toggleVitamin(id){if(!DB.health.vitaminLog)DB.health.vitaminLog={};const tk=todayKey();if(!DB.health.vitaminLog[tk])DB.health.vitaminLog[tk]={};DB.health.vitaminLog[tk][id]=!DB.health.vitaminLog[tk][id];persist.health();renderHealth();if(DB.health.vitaminLog[tk][id])showToast('تم تناول الفيتامين ✅','💊');}
+function openAddVitaminModal(){openModal(`<div class="modal-head"><h3>💊 إضافة فيتامين</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div><div class="field"><label>اسم الفيتامين</label><input id="vName" placeholder="مثال: Vitamin D3"></div><div class="field"><label>الجرعة</label><input id="vDose" placeholder="مثال: 5000 IU"></div><div class="field"><label>التكرار</label><select id="vFreq"><option>يومياً</option><option>مرتين يومياً</option><option>أسبوعياً</option></select></div><button class="btn btn-primary" style="width:100%;" onclick="saveVitamin()">إضافة</button>`);}
+function saveVitamin(){const name=$('#vName').value.trim();if(!name)return;if(!DB.health.vitamins)DB.health.vitamins=[];DB.health.vitamins.push({id:uid(),name,dose:$('#vDose').value.trim(),freq:$('#vFreq').value});persist.health();closeModal();renderHealth();showToast('تمت إضافة الفيتامين','💊');}
+function renderNutritionTab(c){
+  const tk=todayKey();const todayMeals=(DB.health.meals||[]).filter(m=>m.date===tk);
+  const totalCals=todayMeals.reduce((a,m)=>a+(m.calories||0),0);
+  c.innerHTML=`<div class="card" style="margin-bottom:16px;text-align:center;"><div style="font-size:32px;font-weight:900;color:var(--primary);">${totalCals}<span style="font-size:15px;"> سعرة</span></div><div class="muted" style="font-size:13px;">السعرات اليوم</div></div><div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">${todayMeals.map(m=>`<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;"><div><div style="font-weight:700;">${esc(m.name)}</div><div class="muted" style="font-size:12px;">${esc(m.time||'')}${m.notes?' — '+esc(m.notes):''}</div></div><div style="display:flex;align-items:center;gap:10px;"><span style="font-weight:800;color:var(--primary);">${m.calories||0} cal</span><button class="btn btn-icon btn-ghost" style="width:26px;height:26px;color:var(--danger);font-size:11px;" onclick="deleteMeal('${m.id}')">✕</button></div></div>`).join('')}</div><button class="btn btn-primary" style="width:100%;" onclick="openAddMealModal()">+ إضافة وجبة</button>`;
+}
+function openAddMealModal(){openModal(`<div class="modal-head"><h3>🥗 إضافة وجبة</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div><div class="field"><label>اسم الوجبة</label><input id="mName" placeholder="مثال: الإفطار"></div><div class="grid grid-2"><div class="field"><label>الوقت</label><input id="mTime" type="time"></div><div class="field"><label>السعرات</label><input id="mCals" type="number" placeholder="0"></div></div><div class="field"><label>ملاحظات</label><input id="mNotes" placeholder="اختياري"></div><button class="btn btn-primary" style="width:100%;" onclick="saveMeal()">إضافة</button>`);}
+function saveMeal(){const name=$('#mName').value.trim();if(!name)return;if(!DB.health.meals)DB.health.meals=[];DB.health.meals.push({id:uid(),name,date:todayKey(),time:$('#mTime').value,calories:parseInt($('#mCals').value)||0,notes:$('#mNotes').value.trim()});persist.health();closeModal();renderHealth();showToast('تمت إضافة الوجبة','🥗');}
+function deleteMeal(id){DB.health.meals=(DB.health.meals||[]).filter(m=>m.id!==id);persist.health();renderHealth();}
+function renderWorkoutTab(c){
+  const tk=todayKey();const todayLog=(DB.health.workoutLog||[]).filter(w=>w.date===tk);
+  c.innerHTML=`<div class="card" style="margin-bottom:16px;"><h3 class="section-title">🏋️ تمرين اليوم</h3>${!todayLog.length?`<div class="muted" style="font-size:13.5px;padding:14px 0;text-align:center;">لم تسجل تمريناً اليوم.</div>`:todayLog.map(w=>`<div style="padding:12px;border-radius:var(--radius-s);background:var(--primary-dim);margin-bottom:8px;"><div style="font-weight:800;font-size:14px;color:var(--primary);">${esc(w.planName)}</div>${w.notes?`<div class="muted" style="font-size:12.5px;">${esc(w.notes)}</div>`:''}</div>`).join('')}<button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="openLogWorkoutModal()">+ تسجيل تمرين</button></div><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><h3 class="section-title" style="margin:0;">📋 خطط التمرين</h3><button class="btn btn-sm" onclick="openAddWorkoutPlanModal()">+ خطة جديدة</button></div>${!(DB.health.workoutPlans||[]).length?`<div class="muted" style="font-size:13.5px;">لا توجد خطط بعد.</div>`:DB.health.workoutPlans.map(p=>`<div style="padding:14px;border:1px solid var(--border-soft);border-radius:var(--radius-s);margin-bottom:8px;"><div style="font-weight:800;font-size:15px;">${esc(p.name)}</div><div class="muted" style="font-size:12.5px;margin-top:4px;">${(p.exercises||[]).length} تمرين</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">${(p.exercises||[]).map(e=>`<span class="pill" style="font-size:10.5px;">${esc(e.name)} ${e.sets||0}×${e.reps||0}</span>`).join('')}</div></div>`).join('')}</div>`;
+}
+function openAddWorkoutPlanModal(){openModal(`<div class="modal-head"><h3>🏋️ خطة تمرين جديدة</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div><div class="field"><label>اسم الخطة</label><input id="wpName" placeholder="مثال: Push Day"></div><div id="exInputs"><div style="display:flex;gap:6px;margin-bottom:6px;"><input placeholder="اسم التمرين" style="flex:2;" class="ex-name"><input type="number" placeholder="Sets" style="flex:1;" class="ex-sets"><input type="number" placeholder="Reps" style="flex:1;" class="ex-reps"></div></div><button class="btn btn-ghost btn-sm" onclick="addExRow()" style="margin-bottom:14px;">+ تمرين آخر</button><button class="btn btn-primary" style="width:100%;" onclick="saveWorkoutPlan()">حفظ الخطة</button>`);}
+function addExRow(){const c=$('#exInputs');if(!c)return;c.insertAdjacentHTML('beforeend','<div style="display:flex;gap:6px;margin-bottom:6px;"><input placeholder="اسم التمرين" style="flex:2;" class="ex-name"><input type="number" placeholder="Sets" style="flex:1;" class="ex-sets"><input type="number" placeholder="Reps" style="flex:1;" class="ex-reps"></div>');}
+function saveWorkoutPlan(){const name=$('#wpName').value.trim();if(!name)return;const exercises=[];$$('.ex-name').forEach((el,i)=>{const n=el.value.trim();if(n)exercises.push({name:n,sets:parseInt($$('.ex-sets')[i]?.value)||0,reps:parseInt($$('.ex-reps')[i]?.value)||0});});if(!DB.health.workoutPlans)DB.health.workoutPlans=[];DB.health.workoutPlans.push({id:uid(),name,exercises});persist.health();closeModal();renderHealth();showToast('تم حفظ خطة التمرين','🏋️');}
+function openLogWorkoutModal(){const plans=DB.health.workoutPlans||[];if(!plans.length){showToast('أضف خطة تمرين أولاً','⚠️');return;}openModal(`<div class="modal-head"><h3>📝 تسجيل تمرين</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div><div class="field"><label>الخطة</label><select id="wlPlan">${plans.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select></div><div class="field"><label>ملاحظات</label><input id="wlNotes" placeholder="مثال: وزن أفضل من الأسبوع الماضي"></div><button class="btn btn-primary" style="width:100%;" onclick="logWorkout()">تسجيل</button>`);}
+function logWorkout(){const planId=$('#wlPlan').value;const plan=(DB.health.workoutPlans||[]).find(p=>p.id===planId);if(!plan)return;if(!DB.health.workoutLog)DB.health.workoutLog=[];DB.health.workoutLog.push({id:uid(),date:todayKey(),planId,planName:plan.name,notes:$('#wlNotes').value.trim()});persist.health();closeModal();renderHealth();showToast('تم تسجيل التمرين! 💪','💪');addXP(30);checkAchievements();}
+function renderBodyTab(c){
+  const stats=DB.health.bodyStats||[];const last=stats.slice(-1)[0];
+  c.innerHTML=`<div class="card" style="margin-bottom:16px;"><h3 class="section-title">📏 آخر قياساتك</h3>${!last?`<div class="muted" style="font-size:13.5px;padding:10px 0;">لم تُسجَّل قياسات بعد.</div>`:`<div class="grid grid-3" style="margin-bottom:10px;">${last.weight?`<div class="stat-card"><div class="stat-val">${last.weight}</div><div class="stat-lbl">الوزن (كج)</div></div>`:''} ${last.waist?`<div class="stat-card"><div class="stat-val">${last.waist}</div><div class="stat-lbl">الخصر (سم)</div></div>`:''} ${last.chest?`<div class="stat-card"><div class="stat-val">${last.chest}</div><div class="stat-lbl">الصدر (سم)</div></div>`:''} ${last.arms?`<div class="stat-card"><div class="stat-val">${last.arms}</div><div class="stat-lbl">الذراعين (سم)</div></div>`:''} ${last.bodyFat?`<div class="stat-card"><div class="stat-val">${last.bodyFat}%</div><div class="stat-lbl">دهون الجسم</div></div>`:''}</div><div class="muted" style="font-size:12px;">آخر تحديث: ${last.date||''}</div>`}<button class="btn btn-primary" style="margin-top:12px;" onclick="openBodyStatsModal()">+ تسجيل قياسات جديدة</button></div>${stats.length>=2?`<div class="card"><h3 class="section-title">📈 تاريخ الوزن</h3><div class="chart-bars">${stats.filter(s=>s.weight).slice(-8).map((s,i,arr)=>{const maxW=Math.max(...arr.map(x=>x.weight||0),1);return `<div class="chart-col"><div class="chart-fill" style="height:${Math.round((s.weight/maxW)*100)}%;background:linear-gradient(180deg,var(--success),#0d7a5f);"></div><span class="chart-lbl">${(s.date||'').slice(5)}</span></div>`;}).join('')}</div></div>`:''}`;
+}
+function openBodyStatsModal(){openModal(`<div class="modal-head"><h3>📏 قياسات الجسم</h3><button class="btn btn-icon btn-ghost" onclick="closeModal()">✕</button></div><div class="grid grid-2"><div class="field"><label>الوزن (كج)</label><input id="bsWeight" type="number" step="0.1" placeholder="0.0"></div><div class="field"><label>الخصر (سم)</label><input id="bsWaist" type="number" step="0.1" placeholder="0.0"></div><div class="field"><label>الصدر (سم)</label><input id="bsChest" type="number" step="0.1" placeholder="0.0"></div><div class="field"><label>الذراع (سم)</label><input id="bsArms" type="number" step="0.1" placeholder="0.0"></div><div class="field"><label>دهون الجسم %</label><input id="bsFat" type="number" step="0.1" placeholder="0.0"></div></div><button class="btn btn-primary" style="width:100%;" onclick="saveBodyStats()">حفظ القياسات</button>`);}
+function saveBodyStats(){if(!DB.health.bodyStats)DB.health.bodyStats=[];DB.health.bodyStats.push({date:todayKey(),weight:parseFloat($('#bsWeight').value)||null,waist:parseFloat($('#bsWaist').value)||null,chest:parseFloat($('#bsChest').value)||null,arms:parseFloat($('#bsArms').value)||null,bodyFat:parseFloat($('#bsFat').value)||null});persist.health();closeModal();renderHealth();showToast('تم حفظ القياسات','📏');}
+function openHealthFab(){if(HEALTH_TAB==='vitamins')openAddVitaminModal();else if(HEALTH_TAB==='nutrition')openAddMealModal();else if(HEALTH_TAB==='workout')openAddWorkoutPlanModal();else if(HEALTH_TAB==='body')openBodyStatsModal();}
+
+/* EMERGENCY */
+function openEmergencyMode(){
+  const ov=$('#emergencyOverlay');
+  const day=getDay(todayKey());
+  const nextPrayer=OBLIGATORY.find(k=>!day[k])||'isha';
+  const prayerNames={fajr:'الفجر',dhuhr:'الظهر',asr:'العصر',maghrib:'المغرب',isha:'العشاء'};
+  const pendingGoal=DB.goals2026.find(g=>!g.done);
+  ov.innerHTML=`<div style="text-align:center;margin-bottom:24px;"><div style="font-size:40px;margin-bottom:8px;">😮‍💨</div><h2 style="margin:0 0 6px;font-size:22px;font-weight:900;">أنت مرهق — لا بأس</h2><p class="muted" style="font-size:14px;">ركز فقط على هذه الثلاثة الآن</p></div><div class="emergency-card"><div class="emergency-item"><span style="font-size:26px;">🕌</span><div><div style="font-weight:800;font-size:15px;">الصلاة القادمة</div><div style="font-weight:700;font-size:16px;color:var(--primary);">${prayerNames[nextPrayer]||'الصلاة'}</div></div></div><div class="emergency-item"><span style="font-size:26px;">📖</span><div><div style="font-weight:800;font-size:15px;">الورد القرآني</div><div class="muted" style="font-size:13px;">صفحة واحدة فقط الآن</div></div></div><div class="emergency-item"><span style="font-size:26px;">🎯</span><div><div style="font-weight:800;font-size:15px;">أهم مهمة</div><div style="font-weight:700;font-size:14px;color:var(--primary);">${pendingGoal?esc(pendingGoal.title):'أنت محدّث في أهدافك ✅'}</div></div></div><div style="margin-top:18px;padding:14px;background:var(--bg-soft);border-radius:var(--radius-m);text-align:center;"><div style="font-weight:800;font-size:14px;color:var(--primary);">خطوة واحدة في كل مرة 🌿</div></div><button class="btn btn-primary" style="width:100%;margin-top:18px;" onclick="closeEmergencyMode()">أنا جاهز ✅</button></div>`;
+  ov.classList.add('show');
+}
+function closeEmergencyMode(){$('#emergencyOverlay').classList.remove('show');}
+
+function resetWaterToday(){if(!DB.health.water)DB.health.water={};DB.health.water[todayKey()]=0;persist.health();renderHealth();}
+/* BOOT */
 async function boot(){
   await loadAll();
   applyTheme();
   renderShell();
   renderApp();
-  
-  // نظام ميزة الاختصارات الذكية Keyboard Shortcuts (Ctrl + S للحفظ الفوري)
-  window.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+  checkAchievements();
+  window.addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey)&&e.key==='s'){
       e.preventDefault();
-      
-      // حفظ البيانات الحالية المفتوحة في المودال أو العناصر المفعلة بشكل ذكي وفوري
-      const journalTextarea = $('#jContent');
-      const quranNotesTextarea = $('#qNotes');
-      
-      if (journalTextarea) {
-        saveJournal();
-      } else if (quranNotesTextarea) {
-        saveQuranProgress();
-      } else {
-        // إذا لم يكن هناك حقل نصي مفتوح، يطلق حفظاً عاماً لجميع بيانات الـ Cache
-        Promise.all(Object.values(persist).map(fn=>fn())).then(() => {
-          showToast('تمت مزامنة وحفظ كل البيانات محلياً وبنجاح!', '💾');
-        });
-      }
+      const qd=$('#quickDump');
+      if(qd&&qd.value.trim())saveQuickDump();
+      else{Promise.all(Object.values(persist).map(fn=>fn())).then(()=>showToast('تم حفظ كل البيانات','💾'));}
     }
   });
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
 }
-
-// تشغيل نظام حياتك عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', boot);
+document.addEventListener('DOMContentLoaded',boot);
 </script>
-
-<!-- MY LIFE OS MERGED BUILD -->
-<script>
-window.MERGED_FEATURES = {
-  sourceBase: "index(2)",
-  sourceExtra: "index(3)",
-  importedModules: [
-    "Health Center",
-    "Mood Tracking",
-    "Water Tracking",
-    "Vitamins Tracking",
-    "Workout Tracking",
-    "XP System",
-    "Heatmap",
-    "Emergency Mode"
-  ]
-};
-</script>
-
-<section style="display:none" id="merged-features-manifest">
-MY LIFE OS MERGED BUILD
-</section>
-
 </body>
 </html>
